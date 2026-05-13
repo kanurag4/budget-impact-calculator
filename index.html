@@ -4,18 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
-  <title>2026-27 Budget Impact Calculator — KashVector</title>
-  <meta name="description" content="See how the 2026-27 Federal Budget's CGT indexation and negative gearing changes affect your ETF and investment property returns. Free, no sign-up, Australian focus.">
+  <title>Budget Impact Calculator 2026-27 — CGT &amp; Negative Gearing | KashVector</title>
+  <meta name="description" content="Free Australian budget impact calculator for the 2026-27 Federal Budget. See the real-dollar effect on your CGT liability and negative gearing tax savings for ETFs and investment properties.">
+  <link rel="canonical" href="https://kashvector.com/budget-impact/">
+  <meta property="og:title" content="Budget Impact Calculator 2026-27 — CGT &amp; Negative Gearing">
+  <meta property="og:description" content="Free Australian budget impact calculator. See how the 2026-27 Federal Budget's CGT and negative gearing changes affect your investments in real dollars.">
+  <meta property="og:url" content="https://kashvector.com/budget-impact/">
+  <meta property="og:type" content="website">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "2026-27 Budget Impact Calculator",
+    "name": "Budget Impact Calculator 2026-27",
+    "alternateName": ["Budget Impact Calculator", "2026-27 Budget Impact Calculator", "Australian Budget CGT Calculator"],
     "url": "https://kashvector.com/budget-impact/",
-    "description": "Compare CGT and negative gearing impacts of the 2026-27 Federal Budget on ETF and investment property returns.",
+    "description": "Free Australian budget impact calculator. Compare CGT and negative gearing impacts of the 2026-27 Federal Budget on ETF and investment property returns.",
     "applicationCategory": "FinanceApplication",
     "operatingSystem": "Web",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the 2026-27 Australian budget mean for investors?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The 2026-27 Federal Budget introduced two changes for investors from 1 July 2027. The 50% CGT discount is removed for assets acquired on or after 12 May 2026 — replaced by inflation indexation with a 30% minimum rate. Negative gearing deductions are also restricted for established investment properties purchased on or after 12 May 2026. This budget impact calculator models the exact dollar cost of both changes." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I calculate my budget impact?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use the ETF/Shares tab to model CGT changes, or the Investment Property tab for negative gearing impacts. Enter your income, investment details, and expected holding period, then click Calculate Impact to see old versus new rules side by side with a chart showing how the tax gap changes over your holding period." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the 50% CGT discount removed for existing investments?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No — assets owned before 12 May 2026 are grandfathered. If you sell before 1 July 2027, the full 50% CGT discount applies. If you hold past that date, gains are split: growth to 1 July 2027 keeps the 50% discount, and growth after uses indexation. This calculator handles the split automatically." }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the CGT change affect ETF investors?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For ETFs or shares acquired after 12 May 2026, the 50% CGT discount is removed. Instead, only gains above inflation are taxed at a minimum rate of 30%. This is generally worse for high-growth assets but can be better for slow-growth ones where indexation absorbs most of the gain." }
+      },
+      {
+        "@type": "Question",
+        "name": "Who is affected by the negative gearing restriction?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Only buyers of established (existing) investment properties on or after 12 May 2026. New builds are exempt. Properties already owned before 12 May 2026 are grandfathered. Shares and ETFs are completely unaffected by the negative gearing changes." }
+      }
+    ]
   }
   </script>
   <script src="/kv-theme.js"></script>
@@ -137,6 +176,7 @@
             <button class="btn-primary" id="btnCalcEtf">Calculate Impact</button>
             <button class="btn-ghost" id="btnResetEtf">Reset</button>
           </div>
+          <p class="cross-promo">Looking at debt recycling scenarios? <a href="https://kashvector.com/debt-recycling/" class="cross-promo-link">Visit the Debt Recycling Calculator →</a></p>
 
         </aside>
 
@@ -239,6 +279,7 @@
             <button class="btn-primary" id="btnCalcProp">Calculate Impact</button>
             <button class="btn-ghost" id="btnResetProp">Reset</button>
           </div>
+          <p class="cross-promo">Looking at debt recycling scenarios? <a href="https://kashvector.com/debt-recycling/" class="cross-promo-link">Visit the Debt Recycling Calculator →</a></p>
 
         </aside>
 
@@ -278,6 +319,18 @@
       <details class="faq-item">
         <summary>Does this tool store my financial data?</summary>
         <p>No. All calculations run entirely in your browser. Your inputs are saved to your browser's local storage so the page remembers them on return visits. Nothing is transmitted to any server.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What does the 2026-27 Australian budget mean for investors?</summary>
+        <p>The 2026-27 Federal Budget introduced two significant changes for investors effective 1 July 2027. First, the 50% CGT discount is removed for assets acquired on or after 12 May 2026 — replaced by an inflation indexation method with a 30% minimum tax rate. Second, negative gearing deductions are restricted for established investment properties purchased on or after 12 May 2026. This budget impact calculator lets you model the exact dollar cost of both changes for your specific situation.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How do I use this budget impact calculator?</summary>
+        <p>Select the ETF/Shares tab to model CGT changes, or the Investment Property tab for negative gearing impacts. Enter your income (to determine your marginal tax rate), your investment details, and your expected holding period. Click "Calculate Impact" to see a side-by-side comparison of your tax liability under old rules versus the new budget rules, including a chart showing how the gap changes over time.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is the 50% CGT discount being removed for existing investments?</summary>
+        <p>No — assets you already own before 12 May 2026 are grandfathered. If you sell before 1 July 2027, the full 50% CGT discount applies as usual. If you hold past 1 July 2027, your gains are split at that date: growth up to 1 July 2027 retains the 50% discount, and growth after that date is taxed under the new indexation rules. This calculator handles that split automatically when you select "Before 12 May 2026" and enter your purchase date.</p>
       </details>
     </div>
   </section>

@@ -190,6 +190,8 @@ function calcEtf() {
     purchaseYear, purchaseMonth, cgtActual, cgtHyp, rows,
   });
 
+  $('etfResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   saveToStorage({
     etfIncome: income, etfAcquired: acquired,
     etfPurchaseMonth: purchaseMonth, etfPurchaseYear: purchaseYear,
@@ -405,6 +407,8 @@ function calcProperty() {
     maintenance, growthRate, inflationRate, holdingYears, marginalRate,
     restricted, grandfathered, proj, cgtNewDisplay,
   });
+
+  $('propResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   saveToStorage({
     propIncome: income, propType, propPrice: purchasePrice,
