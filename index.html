@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>2026-27 Budget Impact Calculator — KashVector</title>
+  <meta name="description" content="See how the 2026-27 Federal Budget's CGT indexation and negative gearing changes affect your ETF and investment property returns. Free, no sign-up, Australian focus.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "2026-27 Budget Impact Calculator",
+    "url": "https://kashvector.com/budget-impact/",
+    "description": "Compare CGT and negative gearing impacts of the 2026-27 Federal Budget on ETF and investment property returns.",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" }
+  }
+  </script>
+  <script src="/kv-theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="../budget-impact-icon.svg">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <header class="app-header">
+    <a href="../" class="home-logo" aria-label="All KashVector tools">
+      <img src="../logo.svg" alt="KashVector" width="32" height="32">
+      <span class="home-logo-label">← All tools</span>
+    </a>
+    <div class="app-header-center">
+      <h1>
+        <img src="../budget-impact-icon.svg" alt="" width="28" height="28" class="title-icon">
+        2026-27 Budget Impact
+      </h1>
+      <p>See how the Federal Budget's CGT &amp; negative gearing changes affect your investments</p>
+    </div>
+    <button class="theme-toggle" onclick="window.kvTheme.toggle()" aria-label="Toggle theme"></button>
+  </header>
+
+  <!-- Tab navigation -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="etf">ETF / Shares</button>
+    <button class="tab-btn" data-tab="property">Investment Property</button>
+  </div>
+
+  <main>
+
+    <!-- ═══════════════ ETF / SHARES TAB ═══════════════ -->
+    <div id="panel-etf" class="tab-panel">
+      <div class="layout">
+
+        <!-- Input panel -->
+        <aside class="input-panel">
+
+          <div class="card">
+            <h2>Your Income</h2>
+            <div class="field">
+              <label for="etfIncome">Annual income</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="etfIncome" value="120,000" autocomplete="off">
+              </div>
+              <div class="derived" id="etfMarginalRate">Marginal rate: —</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Investment Details</h2>
+            <div class="field">
+              <label for="etfAcquired">When did / will you acquire this asset?</label>
+              <select id="etfAcquired">
+                <option value="post-budget">After 12 May 2026 — full indexation rules apply</option>
+                <option value="pre-budget">Before 12 May 2026 — gains split at 1 July 2027</option>
+              </select>
+              <div class="field-note" id="etfAcquiredNote">Gains to 1 July 2027 keep the 50% discount; gains after that date use indexation.</div>
+            </div>
+            <div class="field" id="etfPurchaseDateField">
+              <label>Purchase month &amp; year</label>
+              <div class="month-year-wrap">
+                <select id="etfPurchaseMonth">
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9" selected>September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+                <input type="number" id="etfPurchaseYear" value="2025" min="2010" max="2026" step="1" class="year-input">
+              </div>
+              <div class="derived" id="etfTransitionNote"></div>
+            </div>
+            <div class="field">
+              <label for="etfAmount">Investment / cost base</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="etfAmount" value="50,000" autocomplete="off">
+              </div>
+            </div>
+            <div class="field">
+              <label for="etfGrowth">Expected capital growth (% p.a.)</label>
+              <input type="number" id="etfGrowth" value="7" min="0" max="30" step="0.5">
+            </div>
+            <div class="field">
+              <label for="etfDividend">Dividend yield (% p.a.)</label>
+              <input type="number" id="etfDividend" value="3" min="0" max="20" step="0.5">
+            </div>
+            <div class="field">
+              <label for="etfFranking">Franking %</label>
+              <input type="number" id="etfFranking" value="70" min="0" max="100" step="5">
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Assumptions</h2>
+            <div class="field">
+              <label for="etfInflation">Assumed inflation (% p.a.)</label>
+              <input type="number" id="etfInflation" value="2" min="0" max="10" step="0.5">
+              <div class="field-note">Indexes your cost base under new CGT rules</div>
+            </div>
+            <div class="field">
+              <label for="etfYears">Holding period — <span id="etfYearsLabel">10 years</span></label>
+              <input type="range" id="etfYears" min="1" max="30" value="10" class="slider">
+              <div class="derived" id="etfSellYear"></div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" id="btnCalcEtf">Calculate Impact</button>
+            <button class="btn-ghost" id="btnResetEtf">Reset</button>
+          </div>
+
+        </aside>
+
+        <!-- Results panel (populated by app.js) -->
+        <section class="results-panel" id="etfResults">
+          <div class="results-placeholder">
+            <p>Enter your details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your CGT liability.</p>
+          </div>
+        </section>
+
+      </div>
+    </div><!-- /panel-etf -->
+
+
+    <!-- ═══════════════ INVESTMENT PROPERTY TAB ═══════════════ -->
+    <div id="panel-property" class="tab-panel hidden">
+      <div class="layout">
+
+        <!-- Input panel -->
+        <aside class="input-panel">
+
+          <div class="card">
+            <h2>Your Income</h2>
+            <div class="field">
+              <label for="propIncome">Annual income</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="propIncome" value="120,000" autocomplete="off">
+              </div>
+              <div class="derived" id="propMarginalRate">Marginal rate: —</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Property Details</h2>
+            <div class="field">
+              <label for="propType">Property type</label>
+              <select id="propType">
+                <option value="established-new">Established — bought after 12 May 2026 (restricted)</option>
+                <option value="newbuild">New build — bought after 12 May 2026 (exempt)</option>
+                <option value="grandfathered">Any property bought before 12 May 2026 (grandfathered)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="propPrice">Purchase price</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="propPrice" value="700,000" autocomplete="off">
+              </div>
+            </div>
+            <div class="field">
+              <label for="propRental">Gross rental income (p.a.)</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="propRental" value="24,000" autocomplete="off">
+              </div>
+              <div class="derived" id="propRentalYield"></div>
+            </div>
+            <div class="field">
+              <label for="propLoan">Investment loan amount</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="propLoan" value="560,000" autocomplete="off">
+              </div>
+            </div>
+            <div class="field">
+              <label for="propRate">Loan interest rate (% p.a.)</label>
+              <input type="number" id="propRate" value="6.5" min="0" max="20" step="0.1">
+              <div class="derived" id="propInterestAmt"></div>
+            </div>
+            <div class="field">
+              <label for="propMaintenance">Annual maintenance &amp; expenses</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" inputmode="numeric" id="propMaintenance" value="5,000" autocomplete="off">
+              </div>
+              <div class="derived" id="propNetPosition"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Growth &amp; Assumptions</h2>
+            <div class="field">
+              <label for="propGrowth">Capital growth rate (% p.a.)</label>
+              <input type="number" id="propGrowth" value="5" min="0" max="20" step="0.5">
+            </div>
+            <div class="field">
+              <label for="propInflation">Assumed inflation (% p.a.)</label>
+              <input type="number" id="propInflation" value="2" min="0" max="10" step="0.5">
+              <div class="field-note">Indexes your cost base under new CGT rules</div>
+            </div>
+            <div class="field">
+              <label for="propYears">Holding period — <span id="propYearsLabel">10 years</span></label>
+              <input type="range" id="propYears" min="1" max="30" value="10" class="slider">
+              <div class="derived" id="propSellYear"></div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" id="btnCalcProp">Calculate Impact</button>
+            <button class="btn-ghost" id="btnResetProp">Reset</button>
+          </div>
+
+        </aside>
+
+        <!-- Results panel (populated by app.js) -->
+        <section class="results-panel" id="propResults">
+          <div class="results-placeholder">
+            <p>Enter your property details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your investment returns.</p>
+          </div>
+        </section>
+
+      </div>
+    </div><!-- /panel-property -->
+
+  </main>
+
+  <!-- Tool info & FAQ -->
+  <section class="tool-info">
+    <div class="tool-about">
+      <h2>About this tool</h2>
+      <p>The 2026-27 Federal Budget introduced two major changes affecting investors from 1 July 2027: the removal of the 50% CGT discount (replaced by inflation indexation) for assets acquired after 12 May 2026, and the restriction of negative gearing deductions for established investment properties purchased on or after that date.</p>
+      <p>This calculator shows the real-dollar impact under both old and new rules — for ETF investors comparing CGT liability, and for property investors comparing their annual tax savings and exit CGT.</p>
+    </div>
+    <div class="tool-faq">
+      <h2>Frequently asked questions</h2>
+      <details class="faq-item">
+        <summary>How does the CGT change affect ETF investors?</summary>
+        <p>For assets acquired after 12 May 2026, the 50% CGT discount is removed. Instead, only the portion of your gain above inflation (the "real" gain) is taxed — at a minimum rate of 30%. This is generally worse for high-growth assets but can be better for slow-growth ones where indexation absorbs most of the gain.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What is indexation and how does it work?</summary>
+        <p>Indexation adjusts your original cost base upward by the inflation rate each year you hold the asset. Only gains above the inflated cost base are taxed. For example, if you paid $50,000 and inflation runs at 2% p.a., your indexed cost base grows to ~$61,000 after 10 years — only gains above that are taxable.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Who is affected by the negative gearing restriction?</summary>
+        <p>Only buyers of established (existing) investment properties on or after 12 May 2026. New builds are exempt — you retain full negative gearing. Properties you already own before 12 May 2026 are grandfathered under old rules. Shares and ETFs are completely unaffected by negative gearing changes.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Does this tool store my financial data?</summary>
+        <p>No. All calculations run entirely in your browser. Your inputs are saved to your browser's local storage so the page remembers them on return visits. Nothing is transmitted to any server.</p>
+      </details>
+    </div>
+  </section>
+
+  <footer>
+    <p>This calculator is for educational purposes only and does not constitute financial or tax advice. Tax rules are complex — consult a qualified adviser before making investment decisions. &copy; <a href="/">KashVector</a> &nbsp;|&nbsp; <a href="/privacy-site.html">Privacy</a></p>
+  </footer>
+
+  <script src="utils.js"></script>
+  <script src="calc/tax.js"></script>
+  <script src="calc/cgt.js"></script>
+  <script src="calc/property.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
