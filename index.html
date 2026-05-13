@@ -79,6 +79,9 @@
     <button class="theme-toggle" onclick="window.kvTheme.toggle()" aria-label="Toggle theme"></button>
   </header>
 
+  <!-- Disclaimer -->
+  <p class="disclaimer-banner">Important Disclaimer: We're still fine-tuning this tool, so please treat results as estimates. The calculations reflect broad 2026 Budget assumptions; however, upcoming legislative changes could greatly impact your specific situation. Use this as a general guide to understanding the 30% CGT floor and index-based tax shifts.</p>
+
   <!-- Tab navigation -->
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="etf">ETF / Shares</button>
@@ -97,7 +100,7 @@
           <div class="card">
             <h2>Your Income</h2>
             <div class="field">
-              <label for="etfIncome">Annual income</label>
+              <label for="etfIncome">Taxable income before CGT</label>
               <div class="input-prefix-wrap">
                 <span class="input-prefix">$</span>
                 <input type="text" inputmode="numeric" id="etfIncome" value="120,000" autocomplete="off">
@@ -201,7 +204,7 @@
           <div class="card">
             <h2>Your Income</h2>
             <div class="field">
-              <label for="propIncome">Annual income</label>
+              <label for="propIncome">Taxable income before CGT</label>
               <div class="input-prefix-wrap">
                 <span class="input-prefix">$</span>
                 <input type="text" inputmode="numeric" id="propIncome" value="120,000" autocomplete="off">
