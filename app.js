@@ -17,7 +17,7 @@ const DEFAULTS = {
   activeTab: 'etf',
 };
 
-let etfChart = null, propChart = null;
+let etfChart = null, etfWorthChart = null, propChart = null, propWorthChart = null;
 
 /* ── Theme-aware chart colors ── */
 function cc() {
@@ -278,6 +278,11 @@ function renderEtfResults({
       <canvas id="etfChartCanvas"></canvas>
     </div>
 
+    <div class="chart-card">
+      <h3>Investment value after CGT — old rules vs. actual</h3>
+      <canvas id="etfWorthChartCanvas"></canvas>
+    </div>
+
     <div class="rate-table-card">
       <h3>At ${holdingYears}-year exit — key figures</h3>
       <table class="kv-table">
@@ -314,6 +319,7 @@ function renderEtfResults({
 
   $('etfResults').innerHTML = html;
   drawEtfChart(rows, acquired, purchaseYear, holdingYears);
+  drawEtfWorthChart(rows, acquired);
 }
 
 function drawEtfChart(rows, acquired, purchaseYear, holdingYears) {
@@ -374,6 +380,64 @@ function drawEtfChart(rows, acquired, purchaseYear, holdingYears) {
   });
 }
 
+function drawEtfWorthChart(rows, acquired) {
+  if (etfWorthChart) etfWorthChart.destroy();
+  const canvas = $('etfWorthChartCanvas');
+  if (!canvas) return;
+  const c      = cc();
+  const labels = rows.map(r => 'Yr ' + r.year);
+
+  etfWorthChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Old rules (50% discount)',
+          data: rows.map(r => Math.round(r.salePrice - r.cgtHypothetical)),
+          borderColor: c.muted,
+          borderDash: [6, 4],
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+        {
+          label: acquired === 'pre-budget' ? 'Actual (split at 1 Jul 2027)' : 'New rules (indexation)',
+          data: rows.map(r => Math.round(r.salePrice - r.cgtActual)),
+          borderColor: c.accent,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: c.text, font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString('en-AU')}`,
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: c.text, maxTicksLimit: 10 }, grid: { color: c.grid } },
+        y: {
+          afterFit: scale => { scale.width = 88; },
+          ticks: {
+            color: c.text, maxTicksLimit: 6,
+            callback: v => '$' + (v >= 1000 ? Math.round(v / 1000) + 'k' : v),
+          },
+          grid: { color: c.grid },
+        },
+      },
+    },
+  });
+}
+
 /* ══════════════════════════════════════════
    PROPERTY CALCULATION
 ══════════════════════════════════════════ */
@@ -399,13 +463,18 @@ function calcProperty() {
     restricted, growthRate,
   });
 
-  /* Grandfathered properties keep old CGT rules on exit */
-  const cgtNewDisplay = grandfathered ? proj.cgtOld : proj.cgtNew;
+  /* Grandfathered: old CGT rules forever.
+     New build: investor can choose 50% discount OR indexation — use whichever is lower.
+     Established: indexation + 30% min (carry-forward reduces the gain). */
+  const isNewbuild    = propType === 'newbuild';
+  const cgtNewDisplay = grandfathered ? proj.cgtOld
+    : isNewbuild      ? Math.min(proj.cgtOld, proj.cgtNew)
+    :                   proj.cgtNew;
 
   renderPropertyResults({
     propType, purchasePrice, rentalIncome, loanAmount, interestRate,
     maintenance, growthRate, inflationRate, holdingYears, marginalRate,
-    restricted, grandfathered, proj, cgtNewDisplay,
+    restricted, grandfathered, isNewbuild, proj, cgtNewDisplay,
   });
 
   $('propResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -424,7 +493,7 @@ function calcProperty() {
 function renderPropertyResults({
   propType, purchasePrice, rentalIncome, loanAmount, interestRate,
   maintenance, growthRate, inflationRate, holdingYears, marginalRate,
-  restricted, grandfathered, proj, cgtNewDisplay,
+  restricted, grandfathered, isNewbuild, proj, cgtNewDisplay,
 }) {
   const annualInterest    = loanAmount * interestRate;
   const netPos            = rentalIncome - annualInterest - maintenance;
@@ -433,7 +502,8 @@ function renderPropertyResults({
   const annualTaxSavingNew= (isNegGeared && restricted) ? 0 : annualTaxSavingOld;
 
   const negGearingImpact  = proj.taxSavingDiff;
-  const cgtImpact         = grandfathered ? 0 : proj.cgtDiff;
+  // New build: impact is min(0, cgtDiff) — investor picks cheaper option, never worse off
+  const cgtImpact         = grandfathered ? 0 : isNewbuild ? Math.min(0, proj.cgtDiff) : proj.cgtDiff;
   const totalImpact       = negGearingImpact + cgtImpact;
 
   /* ── Banners ── */
@@ -444,7 +514,7 @@ function renderPropertyResults({
     : propType === 'newbuild'
     ? `<div class="notice-banner warn">
         ⚠ New builds are exempt from the negative gearing restriction — full deductions retained.
-        However, CGT indexation rules apply on exit.
+        On exit you can choose between the 50% CGT discount or indexation — this calculator shows both options below.
        </div>`
     : `<div class="notice-banner warn">
         ⚠ Established property purchased after 12 May 2026 — rental losses cannot be offset against
@@ -453,7 +523,17 @@ function renderPropertyResults({
 
   /* ── Card classes ── */
   const ngNewClass  = (isNegGeared && restricted) ? 'card-worse' : 'card-new';
-  const cgtNewClass = (!grandfathered && proj.cgtDiff > 0) ? 'card-worse' : 'card-new';
+  const cgtNewClass = (!grandfathered && !isNewbuild && proj.cgtDiff > 0) ? 'card-worse' : 'card-new';
+
+  /* ── Sub-text for cards ── */
+  const ngNewSub = restricted && isNegGeared
+    ? 'Yr 1 deductible; losses carried forward'
+    : grandfathered ? 'Grandfathered' : 'Full deduction retained';
+  const cgtNewSub = grandfathered
+    ? 'Grandfathered (50% disc.)'
+    : isNewbuild
+      ? (proj.cgtNew <= proj.cgtOld ? 'Indexation chosen (better)' : '50% discount chosen (better)')
+      : 'Indexation + carry-fwd offset';
 
   const html = `
     ${banner}
@@ -464,11 +544,23 @@ function renderPropertyResults({
         <div class="card-sub">${isNegGeared ? 'Neg. gearing benefit' : 'Positively geared'}</div>
       </div>
       <div class="summary-card ${ngNewClass}">
-        <div class="card-label">Annual tax saving (new)</div>
+        <div class="card-label">Annual tax saving (new)
+          ${restricted && isNegGeared ? `<span class="tip" data-tip="Year 1: losses are still deductible against all income (before 1 July 2027). From year 2, losses are quarantined and carried forward to offset future rental income or the capital gain on exit.">?</span>` : ''}
+        </div>
         <div class="card-value">$${formatMoney(annualTaxSavingNew)}</div>
-        <div class="card-sub">${restricted && isNegGeared ? 'Losses quarantined'
-          : grandfathered ? 'Grandfathered' : 'Full deduction retained'}</div>
+        <div class="card-sub">${ngNewSub}</div>
       </div>
+      ${isNewbuild ? `
+      <div class="summary-card ${proj.cgtOld <= proj.cgtNew ? 'card-new' : 'card-old'}">
+        <div class="card-label">CGT: 50% discount${proj.cgtOld <= proj.cgtNew ? ' <span class="best-badge">Best</span>' : ''}</div>
+        <div class="card-value">$${formatMoney(proj.cgtOld)}</div>
+        <div class="card-sub">${holdingYears}-yr hold</div>
+      </div>
+      <div class="summary-card ${proj.cgtNew < proj.cgtOld ? 'card-new' : 'card-old'}">
+        <div class="card-label">CGT: indexation${proj.cgtNew < proj.cgtOld ? ' <span class="best-badge">Best</span>' : ''}</div>
+        <div class="card-value">$${formatMoney(proj.cgtNew)}</div>
+        <div class="card-sub">${holdingYears}-yr hold</div>
+      </div>` : `
       <div class="summary-card card-old">
         <div class="card-label">CGT on exit (old)</div>
         <div class="card-value">$${formatMoney(proj.cgtOld)}</div>
@@ -477,8 +569,8 @@ function renderPropertyResults({
       <div class="summary-card ${cgtNewClass}">
         <div class="card-label">CGT on exit (new)</div>
         <div class="card-value">$${formatMoney(cgtNewDisplay)}</div>
-        <div class="card-sub">${grandfathered ? 'Grandfathered (50% disc.)' : 'Indexation, 30% min'}</div>
-      </div>
+        <div class="card-sub">${cgtNewSub}</div>
+      </div>`}
     </div>
 
     ${!grandfathered ? `
@@ -500,6 +592,11 @@ function renderPropertyResults({
       <canvas id="propChartCanvas"></canvas>
     </div>
 
+    <div class="chart-card">
+      <h3>${isNewbuild ? 'Investment value after CGT — 50% discount vs. indexation' : 'Investment value after CGT — old rules vs. actual'}</h3>
+      <canvas id="propWorthChartCanvas"></canvas>
+    </div>
+
     <details class="year-details" id="propYearDetails">
       <summary>Year-by-year breakdown</summary>
       <div class="table-scroll">
@@ -513,6 +610,7 @@ function renderPropertyResults({
               <th>Tax saving (old)</th>
               <th>Tax saving (new)</th>
               <th>Annual diff</th>
+              ${restricted ? '<th>Carry-forward</th>' : ''}
             </tr>
           </thead>
           <tbody>
@@ -531,6 +629,7 @@ function renderPropertyResults({
                 <td class="${r.annualDiff > 0 ? 'fail-cell' : ''}">
                   ${r.annualDiff > 0 ? '-$' : '$'}${formatMoney(Math.abs(r.annualDiff))}
                 </td>
+                ${restricted ? `<td class="${r.carryForwardBalance > 0 ? 'warn-cell' : ''}">${r.carryForwardBalance > 0 ? '$' + formatMoney(r.carryForwardBalance) : '—'}</td>` : ''}
               </tr>`).join('')}
           </tbody>
         </table>
@@ -539,9 +638,13 @@ function renderPropertyResults({
 
   $('propResults').innerHTML = html;
   drawPropChart(proj, restricted, grandfathered);
+  requestAnimationFrame(() => drawPropWorthChart(proj, grandfathered, isNewbuild));
 
   const det = $('propYearDetails');
-  if (det) det.addEventListener('toggle', () => { if (propChart) propChart.resize(); });
+  if (det) det.addEventListener('toggle', () => {
+    if (propChart) propChart.resize();
+    if (propWorthChart) propWorthChart.resize();
+  });
 }
 
 function drawPropChart(proj, restricted, grandfathered) {
@@ -558,8 +661,9 @@ function drawPropChart(proj, restricted, grandfathered) {
         {
           label: 'Old rules (full deduction)',
           data: proj.rows.map(r => Math.round(r.cumTaxSavedOld)),
-          borderColor: c.pass,
-          borderWidth: 2.5,
+          borderColor: c.muted,
+          borderDash: [6, 4],
+          borderWidth: 2,
           pointRadius: 0,
           tension: 0.3,
         },
@@ -567,7 +671,63 @@ function drawPropChart(proj, restricted, grandfathered) {
           label: grandfathered ? 'New rules (same — grandfathered)' : 'New rules (budget)',
           data: proj.rows.map(r => Math.round(r.cumTaxSavedNew)),
           borderColor: grandfathered ? c.pass : c.accent,
-          borderDash: grandfathered ? [] : [6, 4],
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: c.text, font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString('en-AU')}`,
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: c.text, maxTicksLimit: 10 }, grid: { color: c.grid } },
+        y: {
+          afterFit: scale => { scale.width = 88; },
+          ticks: {
+            color: c.text, maxTicksLimit: 6,
+            callback: v => '$' + (v >= 1000 ? Math.round(v / 1000) + 'k' : v),
+          },
+          grid: { color: c.grid },
+        },
+      },
+    },
+  });
+}
+
+function drawPropWorthChart(proj, grandfathered, isNewbuild) {
+  if (propWorthChart) propWorthChart.destroy();
+  const canvas = $('propWorthChartCanvas');
+  if (!canvas) return;
+  const c = cc();
+
+  propWorthChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: proj.rows.map(r => 'Yr ' + r.year),
+      datasets: [
+        {
+          label: isNewbuild ? '50% Discount option' : 'Old rules (50% discount)',
+          data: proj.rows.map(r => Math.round(r.salePrice - r.cgtOld)),
+          borderColor: c.muted,
+          borderDash: [6, 4],
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+        {
+          label: isNewbuild ? 'Indexation option' : (grandfathered ? 'New rules (same — grandfathered)' : 'New rules (indexation)'),
+          data: proj.rows.map(r => Math.round(r.salePrice - (grandfathered ? r.cgtOld : r.cgtNew))),
+          borderColor: grandfathered ? c.pass : c.accent,
           borderWidth: 2.5,
           pointRadius: 0,
           tension: 0.3,
@@ -638,6 +798,7 @@ function resetEtf() {
   updateEtfAcquiredUI();
   updateDerived();
   if (etfChart) { etfChart.destroy(); etfChart = null; }
+  if (etfWorthChart) { etfWorthChart.destroy(); etfWorthChart = null; }
   $('etfResults').innerHTML = '<div class="results-placeholder"><p>Enter your details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your CGT liability.</p></div>';
 }
 
@@ -648,6 +809,7 @@ function resetProp() {
   });
   updateDerived();
   if (propChart) { propChart.destroy(); propChart = null; }
+  if (propWorthChart) { propWorthChart.destroy(); propWorthChart = null; }
   $('propResults').innerHTML = '<div class="results-placeholder"><p>Enter your property details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your investment returns.</p></div>';
 }
 

@@ -553,6 +553,59 @@ select option { background: var(--kv-card-2); }
 html:not(.dark) .year-details tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
 .year-details .pass-cell { color: var(--kv-pass); }
 .year-details .fail-cell { color: var(--kv-fail); }
+.year-details .warn-cell { color: var(--kv-warn); }
+
+/* ── Best-option badge (new build CGT comparison) ── */
+.best-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--kv-accent);
+  color: #fff;
+  padding: 1px 7px;
+  border-radius: 10px;
+  margin-left: 5px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+/* ── Tooltip ── */
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--kv-card-2);
+  border: 1px solid var(--kv-border);
+  color: var(--kv-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: help;
+  position: relative;
+  margin-left: 4px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.tip:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 20px;
+  top: -4px;
+  background: var(--kv-card-2);
+  border: 1px solid var(--kv-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--kv-text);
+  white-space: pre-wrap;
+  width: 220px;
+  z-index: 10;
+  line-height: 1.5;
+}
 
 /* ── Tool info & FAQ ── */
 .tool-info {
