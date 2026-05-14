@@ -19,7 +19,7 @@ Copy-Item -Recurse -Force "C:\Projects\2026-2027 Budget Impact\*" "C:\Projects\S
 Deploy by pushing `C:\Projects\StockAnalysis` (Cloudflare Pages watches that repo):
 ```powershell
 Set-Location "C:\Projects\StockAnalysis"
-git add www/budget-impact/ www/budget-impact-icon.svg www/index.html www/sitemap.xml
+git add www/budget-impact/
 git commit -m "..."
 git push
 ```
@@ -45,9 +45,25 @@ Scripts are loaded in that order at the end of `<body>`. `cgt.js` exports `TRANS
 - `calcCgtOld` — pre-budget assets sold before 1 July 2027: 50% discount on entire gain
 - `calcCgtSplit` — pre-budget assets sold after 1 July 2027: gains split at the transition date. Pre-transition portion uses 50% discount; post-transition portion uses indexation from the transition-date value. Uses `toDecimalYear(year, month)` for month-precise `yearsToTransition`.
 
-**Property negative gearing:** `restricted=true` (established IP post-12-May-2026) quarantines losses — `taxSavingNew = 0`. New builds and grandfathered properties keep full deductions. `property.js` inlines its own `_cgtOld`/`_cgtNew` helpers rather than importing from `cgt.js`.
+**Property negative gearing:** `restricted=true` (established IP post-12-May-2026) quarantines losses from year 2 onwards (`effectivelyRestricted = restricted && yr > 1`). Year 1 losses remain deductible — the restriction only takes effect from 1 July 2027. New builds and grandfathered properties keep full deductions. `property.js` inlines its own `_cgtOld`/`_cgtNew`/`_cgtNewWithCF` helpers rather than importing from `cgt.js`.
+
+**Carry-forward losses (restricted properties):** Quarantined losses accumulate in `carryForward`. Each year the property turns cash-flow positive, carried losses are applied against rental income (`carryApplied * marginalRate` = tax saving). Remaining balance at exit reduces the taxable capital gain via `_cgtNewWithCF(costBase, salePrice, marginalRate, inflationRate, years, carryForward)`. The year-by-year table shows the running `carryForwardBalance`.
+
+**New build CGT — investor's choice:** New build investors can choose between the 50% CGT discount or indexation under the new rules. `app.js` uses `Math.min(proj.cgtOld, proj.cgtNew)` for the impact calculation and shows both options side-by-side in the result cards (with a "Best" badge on the lower value) and as two separate lines in the investment worth chart.
 
 **Grandfathered property in `app.js`:** When `propType === 'grandfathered'`, `cgtNewDisplay = proj.cgtOld` (CGT stays on old 50% discount rules forever) and `cgtImpact = 0`.
+
+**Chart.js layout reflow:** Creating two Chart.js charts synchronously collapses the first chart's canvas. Always wrap the second chart draw in `requestAnimationFrame(() => drawSecondChart(...))`.
+
+**Chart variables:** `etfChart`, `etfWorthChart`, `propChart`, `propWorthChart` — always destroy before recreating.
+
+## Property type classification
+
+| `propType` value | Neg gearing | CGT |
+|---|---|---|
+| `'grandfathered'` | Full deductions (old rules forever) | 50% discount forever |
+| `'newbuild'` | Full deductions (exempt from restriction) | Investor chooses: 50% disc or indexation |
+| `'established-new'` | Restricted from 1 July 2027 (yr 2+); losses quarantined + carried forward | Indexation + 30% min; carry-forward reduces gain at exit |
 
 ## Marginal rates (2026-27, including 2% Medicare levy)
 
@@ -65,3 +81,4 @@ Scripts are loaded in that order at the end of `<body>`. `cgt.js` exports `TRANS
 - **Deploy target:** `C:\Projects\StockAnalysis\www\budget-impact\` → `github.com/kanurag4/stock-evaluator` → Cloudflare Pages → `kashvector.com/budget-impact/`
 - **Icon:** lives at `www/budget-impact-icon.svg` (i.e. `../budget-impact-icon.svg` relative to the tool)
 - **Shared assets** (`kv-theme.js`, `logo.svg`, `style` vars) come from the KashVector root — they are not in this repo
+- **Reference:** `C:\Projects\Rules\budget26.md` — authoritative rules reference for CGT and negative gearing logic
