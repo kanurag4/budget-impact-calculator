@@ -11,6 +11,7 @@ const DEFAULTS = {
   etfAmount: 50000, etfGrowth: 7, etfDividend: 3, etfFranking: 70,
   etfInflation: 2, etfYears: 10,
   propIncome: 120000, propType: 'established-new',
+  propPurchaseMonth: 1, propPurchaseYear: 2020,
   propPrice: 700000, propRental: 24000, propLoan: 560000,
   propRate: 6.5, propMaintenance: 5000,
   propGrowth: 5, propInflation: 2, propYears: 10,
@@ -84,6 +85,47 @@ function updateEtfTransitionNote() {
 }
 
 /* ══════════════════════════════════════════
+   PROPERTY TYPE UI (show/hide purchase date)
+══════════════════════════════════════════ */
+function updatePropTypeUI() {
+  const propType  = $('propType').value;
+  const dateField = $('propPurchaseDateField');
+  const noteEl    = $('propTypeNote');
+  const isGF      = propType === 'grandfathered';
+
+  if (dateField) dateField.style.display = isGF ? '' : 'none';
+  if (noteEl) {
+    noteEl.textContent = isGF
+      ? 'Gains to 1 July 2027 keep the 50% discount; gains after that date use indexation.'
+      : '';
+  }
+  updatePropTransitionNote();
+}
+
+function updatePropTransitionNote() {
+  const el = $('propTransitionNote');
+  if (!el) return;
+  if ($('propType').value !== 'grandfathered') { el.textContent = ''; return; }
+  const month = parseInt($('propPurchaseMonth').value);
+  const year  = parseInt($('propPurchaseYear').value);
+  if (!year) { el.textContent = ''; return; }
+  const purchaseDecimal   = year + (month - 1) / 12;
+  const yearsToTransition = 2027.5 - purchaseDecimal;
+  if (yearsToTransition <= 0) {
+    el.textContent = 'Purchase is at or after 1 July 2027 — select "After 12 May 2026" type instead.';
+    el.className = 'derived warn';
+    return;
+  }
+  const yrs  = Math.floor(yearsToTransition);
+  const mths = Math.round((yearsToTransition - yrs) * 12);
+  const parts = [];
+  if (yrs > 0)  parts.push(yrs  + ' yr'    + (yrs  !== 1 ? 's' : ''));
+  if (mths > 0) parts.push(mths + ' month' + (mths !== 1 ? 's' : ''));
+  el.textContent = parts.join(' ') + ' of growth get the 50% discount';
+  el.className = 'derived';
+}
+
+/* ══════════════════════════════════════════
    DERIVED DISPLAYS
 ══════════════════════════════════════════ */
 function updateEtfDerived() {
@@ -96,8 +138,10 @@ function updateEtfDerived() {
   const baseYear     = acquired === 'pre-budget'
     ? parseInt($('etfPurchaseYear').value)
     : CURRENT_YEAR;
+  const etfSellYear = baseYear + holdingYears;
   $('etfYearsLabel').textContent = holdingYears + (holdingYears === 1 ? ' year' : ' years');
-  $('etfSellYear').textContent   = 'Selling in ' + (baseYear + holdingYears);
+  $('etfSellYear').textContent   = 'Selling in ' + etfSellYear +
+    (etfSellYear < CURRENT_YEAR ? ' (historical)' : '');
 
   updateEtfTransitionNote();
 }
@@ -127,8 +171,15 @@ function updatePropDerived() {
     : `Net: -$${formatMoney(Math.abs(netPos))}/yr (negatively geared)`;
   posEl.className = 'derived ' + (netPos >= 0 ? 'pass' : 'warn');
 
+  const propType     = $('propType').value;
+  const propBaseYear = propType === 'grandfathered'
+    ? (parseInt($('propPurchaseYear').value) || CURRENT_YEAR)
+    : CURRENT_YEAR;
+  const propSellYear = propBaseYear + holdingYears;
   $('propYearsLabel').textContent = holdingYears + (holdingYears === 1 ? ' year' : ' years');
-  $('propSellYear').textContent   = 'Selling in ' + (CURRENT_YEAR + holdingYears);
+  $('propSellYear').textContent   = 'Selling in ' + propSellYear +
+    (propSellYear < CURRENT_YEAR ? ' (historical)' : '');
+  updatePropTransitionNote();
 }
 
 function updateDerived() {
@@ -214,15 +265,19 @@ function renderEtfResults({
   const isNoChange = acquired === 'pre-budget' && cgtActual.split === false;
 
   /* ── Split breakdown banner (pre-budget, selling after transition) ── */
+  const postTransitionNote = (cgtActual.split && cgtActual.postTransitionGain === 0)
+    ? ' <span class="muted" style="font-size:0.82rem">(indexation fully offsets post-transition growth)</span>'
+    : '';
   const splitHTML = (acquired === 'pre-budget' && cgtActual.split) ? `
     <div class="breakeven-row">
-      <strong>How your gain is split at 1 July 2027</strong><br>
+      <strong>How your gain is split at 1 July 2027</strong>
+      <span class="muted" style="font-size:0.82rem;margin-left:8px">based on ${(growthRate * 100).toFixed(1)}% p.a. assumed growth</span><br>
       Growth to 1 Jul 2027&nbsp;(${cgtActual.yearsToTransition.toFixed(1)} yrs):
         <strong>$${formatMoney(cgtActual.preTransitionGain)}</strong> →
         50% discount → <strong>$${formatMoney(cgtActual.preTransitionCgt)}&nbsp;CGT</strong><br>
       Growth after 1 Jul 2027&nbsp;(${cgtActual.yearsAfterTransition.toFixed(1)} yrs):
         <strong>$${formatMoney(cgtActual.postTransitionGain)}</strong> →
-        indexation → <strong>$${formatMoney(cgtActual.postTransitionCgt)}&nbsp;CGT</strong>
+        indexation → <strong>$${formatMoney(cgtActual.postTransitionCgt)}&nbsp;CGT</strong>${postTransitionNote}
     </div>` : '';
 
   /* ── Grandfathered / no-change notice ── */
@@ -319,7 +374,7 @@ function renderEtfResults({
 
   $('etfResults').innerHTML = html;
   drawEtfChart(rows, acquired, purchaseYear, holdingYears);
-  drawEtfWorthChart(rows, acquired);
+  requestAnimationFrame(() => drawEtfWorthChart(rows, acquired));
 }
 
 function drawEtfChart(rows, acquired, purchaseYear, holdingYears) {
@@ -453,6 +508,8 @@ function calcProperty() {
   const inflationRate = (parseFloat($('propInflation').value)  || 0) / 100;
   const holdingYears  = parseInt($('propYears').value);
   const marginalRate  = marginalRate2627(income);
+  const purchaseMonth = parseInt($('propPurchaseMonth').value) || 1;
+  const purchaseYear  = parseInt($('propPurchaseYear').value)  || 2020;
 
   const restricted    = propType === 'established-new';
   const grandfathered = propType === 'grandfathered';
@@ -460,16 +517,17 @@ function calcProperty() {
   const proj = calcPropertyProjection({
     purchasePrice, rentalIncome, interestRate, loanAmount,
     maintenance, marginalRate, inflationRate, years: holdingYears,
-    restricted, growthRate,
+    restricted, growthRate, grandfathered, purchaseYear, purchaseMonth,
   });
 
-  /* Grandfathered: old CGT rules forever.
+  /* Grandfathered: split CGT (50% disc to Jul 2027, indexation after).
      New build: investor can choose 50% discount OR indexation — use whichever is lower.
      Established: indexation + 30% min (carry-forward reduces the gain). */
   const isNewbuild    = propType === 'newbuild';
-  const cgtNewDisplay = grandfathered ? proj.cgtOld
-    : isNewbuild      ? Math.min(proj.cgtOld, proj.cgtNew)
-    :                   proj.cgtNew;
+  const cgtNewDisplay = grandfathered
+    ? (proj.cgtSplitDetail?.cgtLiability ?? proj.cgtOld)
+    : isNewbuild ? Math.min(proj.cgtOld, proj.cgtNew)
+    :              proj.cgtNew;
 
   renderPropertyResults({
     propType, purchasePrice, rentalIncome, loanAmount, interestRate,
@@ -480,8 +538,9 @@ function calcProperty() {
   $('propResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   saveToStorage({
-    propIncome: income, propType, propPrice: purchasePrice,
-    propRental: rentalIncome, propLoan: loanAmount,
+    propIncome: income, propType,
+    propPurchaseMonth: purchaseMonth, propPurchaseYear: purchaseYear,
+    propPrice: purchasePrice, propRental: rentalIncome, propLoan: loanAmount,
     propRate:   parseFloat($('propRate').value)      || 0,
     propMaintenance: maintenance,
     propGrowth:      parseFloat($('propGrowth').value)    || 0,
@@ -502,14 +561,38 @@ function renderPropertyResults({
   const annualTaxSavingNew= (isNegGeared && restricted) ? 0 : annualTaxSavingOld;
 
   const negGearingImpact  = proj.taxSavingDiff;
-  // New build: impact is min(0, cgtDiff) — investor picks cheaper option, never worse off
-  const cgtImpact         = grandfathered ? 0 : isNewbuild ? Math.min(0, proj.cgtDiff) : proj.cgtDiff;
-  const totalImpact       = negGearingImpact + cgtImpact;
+  const cgtSplitDetail    = proj.cgtSplitDetail;
+  const hasSplit          = grandfathered && cgtSplitDetail?.split;
+  // Grandfathered: impact = split CGT minus what 50% discount would have been (0 before Jul 2027)
+  // New build: investor picks cheaper option, never worse off
+  const cgtImpact = grandfathered
+    ? (cgtSplitDetail?.cgtLiability ?? proj.cgtOld) - proj.cgtOld
+    : isNewbuild ? Math.min(0, proj.cgtDiff)
+    :              proj.cgtDiff;
+  const totalImpact = negGearingImpact + cgtImpact;
+
+  /* ── Split breakdown banner for grandfathered properties ── */
+  const postTransitionNote = (hasSplit && cgtSplitDetail.postTransitionGain === 0)
+    ? ' <span class="muted" style="font-size:0.82rem">(indexation fully offsets post-transition growth)</span>'
+    : '';
+  const propSplitHTML = hasSplit ? `
+    <div class="breakeven-row">
+      <strong>How your gain is split at 1 July 2027</strong>
+      <span class="muted" style="font-size:0.82rem;margin-left:8px">based on ${(growthRate * 100).toFixed(1)}% p.a. assumed growth</span><br>
+      Growth to 1 Jul 2027&nbsp;(${cgtSplitDetail.yearsToTransition.toFixed(1)} yrs):
+        <strong>$${formatMoney(cgtSplitDetail.preTransitionGain)}</strong> →
+        50% discount → <strong>$${formatMoney(cgtSplitDetail.preTransitionCgt)}&nbsp;CGT</strong><br>
+      Growth after 1 Jul 2027&nbsp;(${cgtSplitDetail.yearsAfterTransition.toFixed(1)} yrs):
+        <strong>$${formatMoney(cgtSplitDetail.postTransitionGain)}</strong> →
+        indexation → <strong>$${formatMoney(cgtSplitDetail.postTransitionCgt)}&nbsp;CGT</strong>${postTransitionNote}
+    </div>` : '';
 
   /* ── Banners ── */
   const banner = grandfathered
-    ? `<div class="notice-banner">
-        ✓ Grandfathered — full negative gearing deductions and 50% CGT discount apply. No budget impact.
+    ? `<div class="notice-banner${hasSplit ? ' warn' : ''}">
+        ${hasSplit
+          ? '⚠ Grandfathered property — full negative gearing deductions retained. CGT uses split rules: 50% discount on gains to 1 July 2027, then indexation on gains after.'
+          : '✓ Grandfathered property — full negative gearing deductions retained. Selling before 1 July 2027: full 50% CGT discount applies, no budget impact.'}
        </div>`
     : propType === 'newbuild'
     ? `<div class="notice-banner warn">
@@ -523,20 +606,20 @@ function renderPropertyResults({
 
   /* ── Card classes ── */
   const ngNewClass  = (isNegGeared && restricted) ? 'card-worse' : 'card-new';
-  const cgtNewClass = (!grandfathered && !isNewbuild && proj.cgtDiff > 0) ? 'card-worse' : 'card-new';
+  const cgtNewClass = cgtImpact > 0 && !isNewbuild ? 'card-worse' : 'card-new';
 
   /* ── Sub-text for cards ── */
   const ngNewSub = restricted && isNegGeared
     ? 'Yr 1 deductible; losses carried forward'
     : grandfathered ? 'Grandfathered' : 'Full deduction retained';
   const cgtNewSub = grandfathered
-    ? 'Grandfathered (50% disc.)'
+    ? (hasSplit ? 'Split: 50% disc. to Jul 2027, indexation after' : 'Selling before Jul 2027 — 50% discount')
     : isNewbuild
       ? (proj.cgtNew <= proj.cgtOld ? 'Indexation chosen (better)' : '50% discount chosen (better)')
       : 'Indexation + carry-fwd offset';
 
   const html = `
-    ${banner}
+    ${banner}${propSplitHTML}
     <div class="summary-cards cols-4">
       <div class="summary-card card-old">
         <div class="card-label">Annual tax saving (old)</div>
@@ -544,7 +627,7 @@ function renderPropertyResults({
         <div class="card-sub">${isNegGeared ? 'Neg. gearing benefit' : 'Positively geared'}</div>
       </div>
       <div class="summary-card ${ngNewClass}">
-        <div class="card-label">Annual tax saving (new)
+        <div class="card-label">${restricted && isNegGeared ? 'Yr 2+ tax saving (new)' : 'Annual tax saving (new)'}
           ${restricted && isNegGeared ? `<span class="tip" data-tip="Year 1: losses are still deductible against all income (before 1 July 2027). From year 2, losses are quarantined and carried forward to offset future rental income or the capital gain on exit.">?</span>` : ''}
         </div>
         <div class="card-value">$${formatMoney(annualTaxSavingNew)}</div>
@@ -573,7 +656,7 @@ function renderPropertyResults({
       </div>`}
     </div>
 
-    ${!grandfathered ? `
+    ${(!grandfathered || hasSplit) ? `
     <div class="impact-banner">
       <div class="impact-label">Total budget impact over ${holdingYears} years</div>
       <div class="impact-total${totalImpact <= 0 ? ' positive' : ''}">
@@ -587,10 +670,11 @@ function renderPropertyResults({
       </div>
     </div>` : ''}
 
+    ${!grandfathered && !isNewbuild ? `
     <div class="chart-card">
       <h3>Cumulative tax savings — old rules vs. new rules</h3>
       <canvas id="propChartCanvas"></canvas>
-    </div>
+    </div>` : ''}
 
     <div class="chart-card">
       <h3>${isNewbuild ? 'Investment value after CGT — 50% discount vs. indexation' : 'Investment value after CGT — old rules vs. actual'}</h3>
@@ -637,12 +721,17 @@ function renderPropertyResults({
     </details>`;
 
   $('propResults').innerHTML = html;
-  drawPropChart(proj, restricted, grandfathered);
-  requestAnimationFrame(() => drawPropWorthChart(proj, grandfathered, isNewbuild));
+  if (!grandfathered && !isNewbuild) {
+    drawPropChart(proj, restricted, grandfathered);
+    requestAnimationFrame(() => drawPropWorthChart(proj, grandfathered, isNewbuild));
+  } else {
+    if (propChart) { propChart.destroy(); propChart = null; }
+    drawPropWorthChart(proj, grandfathered, isNewbuild);
+  }
 
   const det = $('propYearDetails');
   if (det) det.addEventListener('toggle', () => {
-    if (propChart) propChart.resize();
+    if (propChart)      propChart.resize();
     if (propWorthChart) propWorthChart.resize();
   });
 }
@@ -725,9 +814,9 @@ function drawPropWorthChart(proj, grandfathered, isNewbuild) {
           tension: 0.3,
         },
         {
-          label: isNewbuild ? 'Indexation option' : (grandfathered ? 'New rules (same — grandfathered)' : 'New rules (indexation)'),
-          data: proj.rows.map(r => Math.round(r.salePrice - (grandfathered ? r.cgtOld : r.cgtNew))),
-          borderColor: grandfathered ? c.pass : c.accent,
+          label: isNewbuild ? 'Indexation option' : (grandfathered ? 'Actual (split at 1 Jul 2027)' : 'New rules (indexation)'),
+          data: proj.rows.map(r => Math.round(r.salePrice - (grandfathered ? (r.cgtSplit ?? r.cgtOld) : r.cgtNew))),
+          borderColor: c.accent,
           borderWidth: 2.5,
           pointRadius: 0,
           tension: 0.3,
@@ -807,6 +896,7 @@ function resetProp() {
     const el = $(k);
     if (el) el.value = MONEY_IDS.has(k) ? Number(DEFAULTS[k]).toLocaleString('en-AU') : DEFAULTS[k];
   });
+  updatePropTypeUI();
   updateDerived();
   if (propChart) { propChart.destroy(); propChart = null; }
   if (propWorthChart) { propWorthChart.destroy(); propWorthChart = null; }
@@ -849,8 +939,10 @@ function bindEvents() {
   $('etfYears').addEventListener('input', updateDerived);
   $('propYears').addEventListener('input', updateDerived);
 
-  /* Property type */
-  $('propType').addEventListener('change', updateDerived);
+  /* Property type + purchase date (grandfathered) */
+  $('propType').addEventListener('change', () => { updatePropTypeUI(); updateDerived(); });
+  $('propPurchaseMonth').addEventListener('change', () => { updatePropTransitionNote(); updateDerived(); });
+  $('propPurchaseYear').addEventListener('input',  () => { updatePropTransitionNote(); updateDerived(); });
 
   /* Calculate */
   $('btnCalcEtf').addEventListener('click',  calcEtf);
@@ -870,6 +962,7 @@ function init() {
   if (stored.activeTab) switchTab(stored.activeTab);
 
   updateEtfAcquiredUI();
+  updatePropTypeUI();
   updateDerived();
   bindEvents();
 

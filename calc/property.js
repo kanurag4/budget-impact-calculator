@@ -21,11 +21,71 @@ function _cgtNew(costBase, salePrice, marginalRate, inflationRate, years) {
 
 // Like _cgtNew but reduces the indexed gain by any unused carry-forward losses.
 // Carry-forward losses can be applied against the capital gain on exit.
+//
+// Legislative assumption: quarantined rental losses reduce the *taxable indexed gain*
+// dollar-for-dollar before the 30% minimum rate is applied. This matches the stated intent
+// that losses offset "capital gains on the property when sold" (Budget measure, May 2026).
+// Treat as an estimate until the ATO publishes final determination.
 function _cgtNewWithCF(costBase, salePrice, marginalRate, inflationRate, years, carryForward) {
   const indexedBase = costBase * Math.pow(1 + inflationRate, years);
   const gain = Math.max(salePrice - indexedBase, 0);
   const reducedGain = Math.max(0, gain - carryForward);
   return reducedGain * Math.max(0.30, marginalRate);
+}
+
+// ── Split CGT for grandfathered properties (purchased before 12 May 2026) ──
+// Assets sold after 1 July 2027: gains split at the transition date.
+//   Pre-transition  (purchase → 1 Jul 2027): 50% discount
+//   Post-transition (1 Jul 2027 → sale):     indexation from transition-date value
+// Mirror of calcCgtSplit in cgt.js, inlined here to keep property.js self-contained.
+const _PROP_TRANSITION_YEAR = 2027.5; // 1 July 2027 as decimal year
+
+function _cgtSplitDetail(costBase, salePrice, marginalRate, inflationRate, growthRate, purchaseYear, purchaseMonth, totalYears) {
+  const purchaseDecimal  = purchaseYear + (purchaseMonth - 1) / 12;
+  const saleDecimalYear  = purchaseDecimal + totalYears;
+
+  // Selling before or on transition — pure 50% discount, no split
+  if (saleDecimalYear <= _PROP_TRANSITION_YEAR) {
+    const liability = _cgtOld(costBase, salePrice, marginalRate);
+    return {
+      split: false,
+      cgtLiability:       liability,
+      yearsToTransition:  _PROP_TRANSITION_YEAR - purchaseDecimal,
+      yearsAfterTransition: 0,
+      valueAtTransition:  null,
+      preTransitionGain:  Math.max(salePrice - costBase, 0),
+      preTransitionCgt:   liability,
+      postTransitionGain: 0,
+      postTransitionCgt:  0,
+    };
+  }
+
+  const yearsToTransition    = _PROP_TRANSITION_YEAR - purchaseDecimal;
+  const yearsAfterTransition = saleDecimalYear - _PROP_TRANSITION_YEAR;
+  const valueAtTransition    = costBase * Math.pow(1 + growthRate, yearsToTransition);
+
+  const preTransitionGain = Math.max(valueAtTransition - costBase, 0);
+  const preTransitionCgt  = preTransitionGain * 0.5 * marginalRate;
+
+  const indexedTransitionBase = valueAtTransition * Math.pow(1 + inflationRate, yearsAfterTransition);
+  const postTransitionGain    = Math.max(salePrice - indexedTransitionBase, 0);
+  const postTransitionCgt     = postTransitionGain * Math.max(0.30, marginalRate);
+
+  return {
+    split: true,
+    cgtLiability:       preTransitionCgt + postTransitionCgt,
+    yearsToTransition,
+    yearsAfterTransition,
+    valueAtTransition,
+    preTransitionGain,
+    preTransitionCgt,
+    postTransitionGain,
+    postTransitionCgt,
+  };
+}
+
+function _cgtSplit(costBase, salePrice, marginalRate, inflationRate, growthRate, purchaseYear, purchaseMonth, totalYears) {
+  return _cgtSplitDetail(costBase, salePrice, marginalRate, inflationRate, growthRate, purchaseYear, purchaseMonth, totalYears).cgtLiability;
 }
 
 // Annual negative gearing tax saving for a single year.
@@ -58,15 +118,18 @@ function calcNegGearing({ rentalIncome, interest, maintenance, marginalRate, res
 // Returns year-by-year breakdown and exit CGT under old and new rules.
 function calcPropertyProjection({
   purchasePrice,
-  rentalIncome,      // gross annual rental income (year 0 base)
-  interestRate,      // decimal e.g. 0.065
+  rentalIncome,        // gross annual rental income (year 0 base)
+  interestRate,        // decimal e.g. 0.065
   loanAmount,
-  maintenance,       // annual $ (fixed)
+  maintenance,         // annual $ (fixed)
   marginalRate,
   inflationRate,
   years,
-  restricted,        // true = established IP post-12-May-2026 (neg gearing restricted from yr 2)
-  growthRate,        // property capital growth rate p.a.
+  restricted,          // true = established IP post-12-May-2026 (neg gearing restricted from yr 2)
+  growthRate,          // property capital growth rate p.a.
+  grandfathered = false,    // true = purchased before 12 May 2026 (split CGT after 1 Jul 2027)
+  purchaseYear  = 2020,     // calendar year of purchase (used for split CGT only)
+  purchaseMonth = 1,        // calendar month 1-12 of purchase
 }) {
   const annualInterest = loanAmount * interestRate;
   const rows = [];
@@ -131,6 +194,10 @@ function calcPropertyProjection({
       cgtNew: restricted
         ? _cgtNewWithCF(purchasePrice, salePriceYr, marginalRate, inflationRate, yr, carryForward)
         : _cgtNew(purchasePrice, salePriceYr, marginalRate, inflationRate, yr),
+      // Grandfathered: split CGT (50% disc to Jul 2027, indexation after)
+      cgtSplit: grandfathered
+        ? _cgtSplit(purchasePrice, salePriceYr, marginalRate, inflationRate, growthRate, purchaseYear, purchaseMonth, yr)
+        : undefined,
     });
   }
 
@@ -140,6 +207,11 @@ function calcPropertyProjection({
   const cgtNew = restricted
     ? _cgtNewWithCF(purchasePrice, salePrice, marginalRate, inflationRate, years, carryForward)
     : _cgtNew(purchasePrice, salePrice, marginalRate, inflationRate, years);
+
+  // Grandfathered: split CGT detail for the exit year (used by app.js for display and impact)
+  const cgtSplitDetail = grandfathered
+    ? _cgtSplitDetail(purchasePrice, salePrice, marginalRate, inflationRate, growthRate, purchaseYear, purchaseMonth, years)
+    : null;
 
   const taxSavingDiff = cumTaxSavedOld - cumTaxSavedNew; // lost tax savings due to restriction
   const cgtDiff       = cgtNew - cgtOld;                  // extra CGT under new rules
@@ -151,6 +223,7 @@ function calcPropertyProjection({
     salePrice,
     cgtOld,
     cgtNew,
+    cgtSplitDetail,
     carryForwardBalance: carryForward,
     totalTaxSavedOld: cumTaxSavedOld,
     totalTaxSavedNew: cumTaxSavedNew,
@@ -161,5 +234,5 @@ function calcPropertyProjection({
 }
 
 if (typeof module !== 'undefined') module.exports = {
-  calcNegGearing, calcPropertyProjection,
+  calcNegGearing, calcPropertyProjection, _cgtSplitDetail,
 };
