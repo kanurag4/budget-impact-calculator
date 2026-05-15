@@ -110,6 +110,38 @@ body {
   .theme-toggle { position: static; width: 44px; height: 44px; flex-shrink: 0; }
 }
 
+/* ── Tool navigation bar ── */
+.kv-tool-nav {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--kv-border);
+  background: var(--kv-bg);
+  padding: 0 16px;
+  scrollbar-width: none;
+}
+.kv-tool-nav::-webkit-scrollbar { display: none; }
+.kv-tool-nav a {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--kv-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.kv-tool-nav a:hover { color: var(--kv-text); }
+.kv-tool-nav a.kv-nav-active {
+  color: var(--kv-accent);
+  border-bottom-color: var(--kv-accent);
+}
+html:not(.dark) .kv-tool-nav { background: #edf2f7; border-color: #e2e8f0; }
+html:not(.dark) .kv-tool-nav a { color: #64748b; }
+html:not(.dark) .kv-tool-nav a:hover { color: #0f172a; }
+html:not(.dark) .kv-tool-nav a.kv-nav-active { color: #0ea5e9; border-bottom-color: #0ea5e9; }
+
 /* ── Disclaimer banner ── */
 .disclaimer-banner {
   text-align: center;

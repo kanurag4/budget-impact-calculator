@@ -201,7 +201,7 @@ function bindMoneyInputs() {
 /* ══════════════════════════════════════════
    ETF CALCULATION
 ══════════════════════════════════════════ */
-function calcEtf() {
+function calcEtf(silent = false) {
   const income        = parseMoney($('etfIncome'));
   const acquired      = $('etfAcquired').value;
   const purchaseMonth = parseInt($('etfPurchaseMonth').value);
@@ -241,7 +241,7 @@ function calcEtf() {
     purchaseYear, purchaseMonth, cgtActual, cgtHyp, rows,
   });
 
-  $('etfResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!silent) $('etfResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   saveToStorage({
     etfIncome: income, etfAcquired: acquired,
@@ -496,7 +496,7 @@ function drawEtfWorthChart(rows, acquired) {
 /* ══════════════════════════════════════════
    PROPERTY CALCULATION
 ══════════════════════════════════════════ */
-function calcProperty() {
+function calcProperty(silent = false) {
   const income        = parseMoney($('propIncome'));
   const propType      = $('propType').value;
   const purchasePrice = parseMoney($('propPrice'));
@@ -535,7 +535,7 @@ function calcProperty() {
     restricted, grandfathered, isNewbuild, proj, cgtNewDisplay,
   });
 
-  $('propResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!silent) $('propResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   saveToStorage({
     propIncome: income, propType,
@@ -945,8 +945,8 @@ function bindEvents() {
   $('propPurchaseYear').addEventListener('input',  () => { updatePropTransitionNote(); updateDerived(); });
 
   /* Calculate */
-  $('btnCalcEtf').addEventListener('click',  calcEtf);
-  $('btnCalcProp').addEventListener('click', calcProperty);
+  $('btnCalcEtf').addEventListener('click',  () => calcEtf());
+  $('btnCalcProp').addEventListener('click', () => calcProperty());
 
   /* Reset */
   $('btnResetEtf').addEventListener('click',  resetEtf);
@@ -968,8 +968,8 @@ function init() {
 
   /* Auto-calculate on return visit if stored state exists */
   if (Object.keys(stored).length > 2) {
-    calcEtf();
-    calcProperty();
+    calcEtf(true);
+    calcProperty(true);
   }
 }
 
