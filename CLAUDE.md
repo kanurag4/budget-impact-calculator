@@ -77,6 +77,16 @@ Script load order at the end of `<body>`: `utils.js` → `calc/tax.js` → `calc
 | ≤ $190,000 | 39% |
 | > $190,000 | 47% |
 
+## Cross-tool navigation bar
+
+A static `<nav class="kv-tool-nav">` is placed immediately after `</header>` in `index.html`. It lists all 10 KashVector tools with the Budget Impact link marked active (`class="kv-nav-active" aria-current="page"`). CSS lives in `style.css`.
+
+**Do not use JS injection** — static HTML ensures zero layout shift on page load.
+
+**Auto-calculate scroll pitfall:** `calcEtf()` and `calcProperty()` accept a `silent` parameter that suppresses `scrollIntoView`. Auto-calculate on load calls `calcEtf(true)` / `calcProperty(true)`. Button listeners use arrow functions `() => calcEtf()` — passing the function reference directly would send `MouseEvent` as `silent`, suppressing the scroll.
+
+See `C:\Projects\Rules\kashvector-design.md` → "Cross-tool navigation bar" for the full pattern.
+
 ## Deployment context
 
 - **Source:** `C:\Projects\2026-2027 Budget Impact\` → GitHub: `github.com/kanurag4/budget-impact-calculator`
