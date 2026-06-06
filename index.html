@@ -52,7 +52,7 @@
       {
         "@type": "Question",
         "name": "Who is affected by the negative gearing restriction?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Only buyers of established (existing) investment properties on or after 12 May 2026. New builds are exempt. Properties already owned before 12 May 2026 are grandfathered. Shares and ETFs are completely unaffected by the negative gearing changes." }
+        "acceptedAnswer": { "@type": "Answer", "text": "Only buyers of established (existing) investment properties on or after 12 May 2026. New builds are exempt. Properties already owned before 12 May 2026 are grandfathered. Shares and ETFs are completely unaffected. Note: the Treasury factsheet states quarantined losses are deductible against 'other income from residential properties, including capital gains' — this calculator models the single-property case, so investors with multiple residential properties may have additional flexibility not shown here." }
       }
     ]
   }
@@ -208,6 +208,7 @@
 
     <!-- ═══════════════ INVESTMENT PROPERTY TAB ═══════════════ -->
     <div id="panel-property" class="tab-panel hidden">
+      <p class="prop-model-note">This tool models a single property. The Treasury factsheet states quarantined losses are deductible against "other income from residential properties, including capital gains" — if you hold multiple residential properties, you may have additional flexibility not captured here. How losses interact with the 30% CGT minimum at exit is a legislative assumption pending final ATO guidance.</p>
       <div class="layout">
 
         <!-- Input panel -->
@@ -375,7 +376,9 @@
       </details>
       <details class="faq-item">
         <summary>What happens to quarantined negative gearing losses for restricted properties?</summary>
-        <p>For established investment properties purchased on or after 12 May 2026, rental losses from year 2 onwards cannot be offset against your salary — they are quarantined and carried forward. Carried-forward losses are applied against future positive rental income (reducing the taxable amount) and any remaining balance reduces the taxable capital gain when you eventually sell. This calculator tracks the carry-forward balance year by year and shows its impact on your exit CGT.</p>
+        <p>For established investment properties purchased on or after 12 May 2026, rental losses from year 2 onwards cannot be offset against your salary — they are quarantined and carried forward. The Treasury factsheet states these losses are only deductible against <em>other income from residential properties, including capital gains</em>.</p>
+        <p>This calculator models the single-property case: carried-forward losses are applied against future positive rental income from that same property (reducing the taxable amount), and any remaining balance reduces the taxable capital gain when you sell. If you hold multiple residential investment properties, you may also be able to apply those losses against income from your other properties — giving you more flexibility than this tool's single-property model shows.</p>
+        <p>Note: exactly how quarantined losses interact with the new 30% CGT minimum rate at exit is a legislative assumption pending final ATO guidance. This calculator treats them as reducing the indexed gain dollar-for-dollar before the tax rate is applied — the most defensible interpretation of the factsheet language.</p>
       </details>
       <details class="faq-item">
         <summary>Can I still negatively gear a restricted property in the first year?</summary>

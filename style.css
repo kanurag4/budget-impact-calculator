@@ -155,6 +155,23 @@ html:not(.dark) .kv-tool-nav a.kv-nav-active { color: #0ea5e9; border-bottom-col
   margin: 0;
 }
 
+/* ── Property tab — single-property model note ── */
+.prop-model-note {
+  max-width: 900px;
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  border-left: 3px solid var(--kv-warn);
+  background: color-mix(in srgb, var(--kv-warn) 8%, var(--kv-card));
+  border-radius: 0 6px 6px 0;
+  font-size: 0.8rem;
+  color: var(--kv-muted);
+  line-height: 1.55;
+}
+html:not(.dark) .prop-model-note {
+  background: color-mix(in srgb, var(--kv-warn) 10%, #edf2f7);
+  color: #475569;
+}
+
 /* ── Tab bar ── */
 .tab-bar {
   display: flex;
