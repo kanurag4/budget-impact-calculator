@@ -20,6 +20,117 @@ const DEFAULTS = {
 
 let etfChart = null, etfWorthChart = null, propChart = null, propWorthChart = null;
 
+/* ── Cross-tool scenario links & shared profile ──────────────────────────────
+   This tool has two independent income inputs — etfIncome (ETF/Shares tab)
+   and propIncome (Investment Property tab) — but they represent the same
+   real-world concept as every other tool's "income" field. FIELD_MAP is keyed
+   by a virtual field name ('income'), not a literal DOM id, since readParams/
+   buildLink just iterate the map's keys and call the getValue callback we
+   supply — so a single logical key can be backed by either or both actual
+   inputs depending on context (see applyScenarioParams/applyProfilePrefill,
+   which write to both inputs, and the two copy-link buttons, which each read
+   from their own tab's input).
+   There is deliberately no "state" mapping: unlike Mortgage/Rent vs Buy, this
+   tool has no Australian state selector anywhere (propType is a negative-
+   gearing property category — established/new-build/grandfathered — not a
+   geographic state), so the brief's "state" hypothesis does not apply here. */
+const FIELD_MAP = {
+  income: { param: 'i', profileKey: 'income' },
+};
+
+const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+let scenarioParamsApplied = false;
+// Captured before applyStoredValues() runs further down in init().
+const hadSavedStateOnLoad = !!localStorage.getItem(STORAGE_KEY);
+
+// Tracks whether the user has genuinely edited either income field in this
+// session. Only set inside real user-input event handlers in bindEvents() —
+// never during applyStoredValues, applyScenarioParams, or applyProfilePrefill,
+// which apply values programmatically rather than via genuine user interaction.
+const touchedProfileFields = { etfIncome: false, propIncome: false };
+
+function applyScenarioParams() {
+  if (isNative || !window.kvScenario) return;
+  const params = window.kvScenario.readParams(FIELD_MAP);
+  if (Object.keys(params).length === 0) return;
+  if (params.income) {
+    ['etfIncome', 'propIncome'].forEach(id => {
+      const el = $(id);
+      if (!el) return;
+      el.value = params.income;
+      formatMoneyInput(el);
+    });
+  }
+  scenarioParamsApplied = true;
+}
+
+function applyProfilePrefill() {
+  if (isNative || !window.kvScenario || scenarioParamsApplied) return;
+  if (hadSavedStateOnLoad) return; // tool's own saved value always wins
+  const profile = window.kvScenario.getProfile();
+  let prefilled = false;
+  if (profile.fields.income) {
+    ['etfIncome', 'propIncome'].forEach(id => {
+      const el = $(id);
+      if (!el) return;
+      el.value = String(Math.round(profile.fields.income));
+      formatMoneyInput(el);
+    });
+    prefilled = true;
+  }
+  if (prefilled) showPrefillChip();
+}
+
+function showPrefillChip() {
+  const chip = document.createElement('div');
+  chip.className = 'kv-prefill-chip';
+  chip.innerHTML = 'Pre-filled from your other tools · <button type="button" id="clearPrefillBtn">clear</button>';
+  const field = $('etfIncome').closest('.field');
+  field.insertAdjacentElement('afterend', chip);
+  document.getElementById('clearPrefillBtn').addEventListener('click', function () {
+    $('etfIncome').value  = Number(DEFAULTS.etfIncome).toLocaleString('en-AU');
+    $('propIncome').value = Number(DEFAULTS.propIncome).toLocaleString('en-AU');
+    updateDerived();
+    chip.remove();
+    // local-only — never pushes to the shared profile
+    saveToStorage({ etfIncome: DEFAULTS.etfIncome, propIncome: DEFAULTS.propIncome });
+  });
+}
+
+// Pushes the current value of one tab's income field to the shared profile,
+// but only if the user actually edited THAT SPECIFIC input this session (real
+// input events set touchedProfileFields[id] — see bindEvents). Tracked per
+// DOM input (not a single shared flag) because etfIncome and propIncome are
+// independent fields that both back the same logical profile key — editing
+// one must not authorize pushing the other's possibly-stale value. Called
+// from calcEtf()/calcProperty() so the profile only updates on Calculate,
+// matching every other tool in this rollout.
+function maybePushIncomeToProfile(incomeInputId) {
+  if (isNative || !window.kvScenario) return;
+  if (!touchedProfileFields[incomeInputId]) return;
+  window.kvScenario.saveProfile({ income: parseMoney($(incomeInputId)) });
+}
+
+function bindCopyLinkButton(btnId, incomeInputId) {
+  const btn = $(btnId);
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    const getValue = () => {
+      const el = $(incomeInputId);
+      return el ? el.value : '';
+    };
+    const link = window.kvScenario.buildLink(FIELD_MAP, getValue);
+    navigator.clipboard.writeText(link).then(function () {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(function () {
+        btn.textContent = '🔗 Create link to share this scenario';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  });
+}
+
 /* ── Theme-aware chart colors ── */
 function cc() {
   const dark = document.documentElement.classList.contains('dark');
@@ -252,6 +363,8 @@ function calcEtf(silent = false) {
     etfInflation: parseFloat($('etfInflation').value) || 0,
     etfYears: holdingYears,
   });
+
+  maybePushIncomeToProfile('etfIncome');
 }
 
 function renderEtfResults({
@@ -547,6 +660,8 @@ function calcProperty(silent = false) {
     propInflation:   parseFloat($('propInflation').value) || 0,
     propYears: holdingYears,
   });
+
+  maybePushIncomeToProfile('propIncome');
 }
 
 function renderPropertyResults({
@@ -951,6 +1066,11 @@ function bindEvents() {
   /* Reset */
   $('btnResetEtf').addEventListener('click',  resetEtf);
   $('btnResetProp').addEventListener('click', resetProp);
+
+  /* Cross-tool shared-profile dirty tracking — only real user input marks
+     income as touched; see the touchedProfileFields comment above. */
+  $('etfIncome').addEventListener('input',  () => { touchedProfileFields.etfIncome = true; });
+  $('propIncome').addEventListener('input', () => { touchedProfileFields.propIncome = true; });
 }
 
 /* ══════════════════════════════════════════
@@ -963,11 +1083,28 @@ function init() {
 
   updateEtfAcquiredUI();
   updatePropTypeUI();
-  updateDerived();
   bindEvents();
 
-  /* Auto-calculate on return visit if stored state exists */
-  if (Object.keys(stored).length > 2) {
+  // Cross-tool scenario links & profile pre-fill (URL params win over profile;
+  // the tool's own saved state always wins over both).
+  applyScenarioParams();
+  applyProfilePrefill();
+
+  updateDerived();
+
+  if (!isNative) {
+    bindCopyLinkButton('copyLinkBtnEtf', 'etfIncome');
+    bindCopyLinkButton('copyLinkBtnProp', 'propIncome');
+  } else {
+    ['copyLinkBtnEtf', 'copyLinkBtnProp'].forEach(id => {
+      const btn = $(id);
+      if (btn) btn.style.display = 'none';
+    });
+  }
+
+  /* Auto-calculate on return visit if stored state exists, or silently when
+     arriving via a shared scenario link. */
+  if (Object.keys(stored).length > 2 || scenarioParamsApplied) {
     calcEtf(true);
     calcProperty(true);
   }

@@ -196,9 +196,12 @@
         </aside>
 
         <!-- Results panel (populated by app.js) -->
-        <section class="results-panel" id="etfResults">
-          <div class="results-placeholder">
-            <p>Enter your details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your CGT liability.</p>
+        <section class="results-panel">
+          <button id="copyLinkBtnEtf" class="kv-copy-link-btn" type="button">🔗 Create link to share this scenario</button>
+          <div id="etfResults">
+            <div class="results-placeholder">
+              <p>Enter your details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your CGT liability.</p>
+            </div>
           </div>
         </section>
 
@@ -322,9 +325,12 @@
         </aside>
 
         <!-- Results panel (populated by app.js) -->
-        <section class="results-panel" id="propResults">
-          <div class="results-placeholder">
-            <p>Enter your property details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your investment returns.</p>
+        <section class="results-panel">
+          <button id="copyLinkBtnProp" class="kv-copy-link-btn" type="button">🔗 Create link to share this scenario</button>
+          <div id="propResults">
+            <div class="results-placeholder">
+              <p>Enter your property details and click <strong>Calculate Impact</strong> to see how the 2026-27 Budget affects your investment returns.</p>
+            </div>
           </div>
         </section>
 
@@ -399,6 +405,7 @@
   <script src="calc/tax.js"></script>
   <script src="calc/cgt.js"></script>
   <script src="calc/property.js"></script>
+  <script src="/kv-scenario.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

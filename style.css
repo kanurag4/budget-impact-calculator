@@ -739,3 +739,47 @@ footer a:hover { text-decoration: underline; }
   .summary-cards.cols-3 { grid-template-columns: 1fr 1fr; }
   .summary-cards.cols-4 { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── Cross-tool: copy-link button ── */
+.kv-copy-link-btn {
+  align-self: flex-start;
+  background: color-mix(in srgb, var(--kv-accent) 14%, var(--kv-card));
+  border: 1px solid var(--kv-accent);
+  color: var(--kv-accent);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--kv-accent) 25%, transparent);
+  transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.kv-copy-link-btn:hover {
+  background: var(--kv-accent);
+  color: var(--kv-bg);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--kv-accent) 40%, transparent);
+}
+.kv-copy-link-btn.copied {
+  background: color-mix(in srgb, var(--kv-pass) 14%, var(--kv-card));
+  color: var(--kv-pass);
+  border-color: var(--kv-pass);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--kv-pass) 25%, transparent);
+}
+
+/* ── Cross-tool: profile pre-fill chip ── */
+.kv-prefill-chip {
+  font-size: 0.78rem;
+  color: var(--kv-accent);
+  margin-top: 4px;
+}
+.kv-prefill-chip button {
+  background: none;
+  border: none;
+  color: var(--kv-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 0;
+}
