@@ -995,6 +995,7 @@ function applyStoredValues(s) {
 const MONEY_IDS = new Set(['etfIncome','etfAmount','propIncome','propPrice','propRental','propLoan','propMaintenance']);
 
 function resetEtf() {
+  touchedProfileFields.etfIncome = false;
   Object.keys(DEFAULTS).filter(k => k.startsWith('etf')).forEach(k => {
     const el = $(k);
     if (el) el.value = MONEY_IDS.has(k) ? Number(DEFAULTS[k]).toLocaleString('en-AU') : DEFAULTS[k];
@@ -1007,6 +1008,7 @@ function resetEtf() {
 }
 
 function resetProp() {
+  touchedProfileFields.propIncome = false;
   Object.keys(DEFAULTS).filter(k => k.startsWith('prop')).forEach(k => {
     const el = $(k);
     if (el) el.value = MONEY_IDS.has(k) ? Number(DEFAULTS[k]).toLocaleString('en-AU') : DEFAULTS[k];
