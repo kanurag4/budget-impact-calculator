@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b1120">
   <title>Budget Impact Calculator 2026-27 — CGT &amp; Negative Gearing | KashVector</title>
   <meta name="description" content="Free Australian budget impact calculator for the 2026-27 Federal Budget. See the real-dollar effect on your CGT liability and negative gearing tax savings for ETFs and investment properties.">
   <link rel="canonical" href="https://kashvector.com/budget-impact/">
@@ -58,6 +58,10 @@
   }
   </script>
   <script src="/kv-theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/kv-shared.css">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/svg+xml" href="../budget-impact-icon.svg">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
@@ -78,19 +82,9 @@
     </div>
     <button class="theme-toggle" onclick="window.kvTheme.toggle()" aria-label="Toggle theme"></button>
   </header>
-  <nav class="kv-tool-nav" aria-label="KashVector tools">
-    <a href="/stock/">Stock Evaluator</a>
-    <a href="/budget/">Budget</a>
-    <a href="/debt-recycling/">Debt Recycling</a>
-    <a href="/portfolio-health/">Portfolio</a>
-    <a href="/fire/">FIRE</a>
-    <a href="/mortgage/">Mortgage Calculator</a>
-    <a href="/super-compare/">Salary Sacrifice</a>
-    <a href="/rent-vs-buy/">Rent vs Buy</a>
-    <a href="/life-buyback/">Life Buyback</a>
-    <a href="/budget-impact/" class="kv-nav-active" aria-current="page">Budget Impact</a>
-    <a href="/hecs/">HECS</a>
-  </nav>
+  <div id="kv-nav-placeholder" style="height:41px"></div>
+  <script src="/kv-nav.js"></script>
+  <script src="/kv-banner.js"></script>
 
   <!-- Disclaimer -->
   <p class="disclaimer-banner">Important Disclaimer: We're still fine-tuning this tool, so please treat results as estimates. The calculations reflect broad 2026 Budget assumptions; however, upcoming legislative changes could greatly impact your specific situation. Use this as a general guide to understanding the 30% CGT floor and index-based tax shifts.</p>
@@ -340,6 +334,22 @@
 
   </main>
 
+  <section class="sharesight-promo" aria-label="Affiliate promotion">
+    <div class="sharesight-promo-inner">
+      <div class="sharesight-logo-wrap">
+        <img src="/sharesight-logo.jpg" alt="Sharesight" width="120" height="28">
+      </div>
+      <div class="sharesight-copy">
+        <p class="sharesight-offer">⭐ <strong>Special offer for KashVector users</strong> — save 4 months on an annual plan.</p>
+        <p>Your broker doesn't show the full picture. Sharesight tracks true portfolio performance — dividends, currency gains, and capital gains reports at tax time. Trusted by 500,000+ investors worldwide.</p>
+      </div>
+      <div class="sharesight-cta">
+        <a href="https://www.sharesight.com/au/kashvector/" target="_blank" rel="noopener sponsored">Try free</a>
+        <span class="sharesight-affiliate-note">Affiliate link</span>
+      </div>
+    </div>
+  </section>
+
   <!-- Tool info & FAQ -->
   <section class="tool-info">
     <div class="tool-about">
@@ -399,7 +409,8 @@
   </section>
 
   <footer>
-    <p>This calculator is for educational purposes only and does not constitute financial or tax advice. Tax rules are complex — consult a qualified adviser before making investment decisions. &copy; <a href="/">KashVector</a> &nbsp;|&nbsp; <a href="/privacy-site.html">Privacy</a></p>
+    <p>This calculator is for educational purposes only and does not constitute financial or tax advice. Tax rules are complex — consult a qualified adviser before making investment decisions. &nbsp;|&nbsp; <a href="/privacy-site.html">Privacy</a></p>
+    <p>© 2026 KashVector. All rights reserved.</p>
   </footer>
 
   <script src="utils.js"></script>

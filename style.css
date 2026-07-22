@@ -1,26 +1,28 @@
 /* ── KashVector design tokens (dark mode default) ── */
 :root {
-  --kv-bg:       #0f172a;
-  --kv-card:     #1e293b;
-  --kv-card-2:   #273449;
-  --kv-text:     #f1f5f9;
-  --kv-muted:    #94a3b8;
-  --kv-accent:   #38bdf8;
-  --kv-accent-h: #0ea5e9;
-  --kv-border:   #334155;
+  --kv-bg:       #0b1120;
+  --kv-card:     #111a30;
+  --kv-card-2:   #182342;
+  --kv-text:     #f5f7fc;
+  --kv-muted:    #93a0bd;
+  --kv-accent:   #f5a623;
+  --kv-accent-h: #ffb84d;
+  --kv-border:   #223052;
   --kv-pass:     #22c55e;
   --kv-fail:     #ef4444;
-  --kv-warn:     #f59e0b;
+  --kv-warn:     #f97316;
 }
 
-/* ── Light mode (Crisp White palette) ── */
+/* ── Light mode ── */
 html:not(.dark) {
-  --kv-bg:     #edf2f7;
-  --kv-card:   #d4dce8;
-  --kv-card-2: #c5cfe0;
-  --kv-text:   #0f172a;
-  --kv-muted:  #64748b;
-  --kv-border: #e2e8f0;
+  --kv-bg:     #faf8f4;
+  --kv-card:   #ffffff;
+  --kv-card-2: #f1ede4;
+  --kv-text:   #16202b;
+  --kv-muted:  #4d5c6b;
+  --kv-border: #e7e2d8;
+  --kv-accent: #1a3a5f;
+  --kv-warn:   #b45309;
 }
 
 /* ── Reset & base ── */
@@ -29,10 +31,13 @@ html:not(.dark) {
 body {
   background: var(--kv-bg);
   color: var(--kv-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 15px;
+  font-family: 'Carlito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15.5px;
   line-height: 1.5;
   min-height: 100vh;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── Header ── */
@@ -43,27 +48,6 @@ body {
   position: relative;
 }
 
-.home-logo {
-  position: absolute;
-  top: 18px;
-  left: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  text-decoration: none;
-}
-.home-logo img { width: 32px; height: 32px; opacity: 0.9; display: block; transition: opacity 0.15s; }
-.home-logo:hover img { opacity: 1; }
-.home-logo-label {
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  color: var(--kv-muted);
-  transition: color 0.15s;
-  white-space: nowrap;
-}
-.home-logo:hover .home-logo-label { color: var(--kv-accent); }
 
 .app-header-center h1 {
   font-size: 1.5rem;
@@ -81,69 +65,11 @@ body {
   font-size: 0.88rem;
 }
 
-/* ── Theme toggle ── */
-.theme-toggle {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--kv-border);
-  background: var(--kv-card);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--kv-muted);
-  font-size: 0.9rem;
-  transition: background 0.15s, border-color 0.15s;
-  padding: 0;
-}
-.theme-toggle:hover {
-  background: var(--kv-card-2);
-  border-color: var(--kv-accent);
-  color: var(--kv-text);
-}
 /* mobile override MUST come after base rule */
 @media (max-width: 800px) {
   .theme-toggle { position: static; width: 44px; height: 44px; flex-shrink: 0; }
 }
 
-/* ── Tool navigation bar ── */
-.kv-tool-nav {
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--kv-border);
-  background: var(--kv-bg);
-  padding: 0 16px;
-  scrollbar-width: none;
-}
-.kv-tool-nav::-webkit-scrollbar { display: none; }
-.kv-tool-nav a {
-  flex-shrink: 0;
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--kv-muted);
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: color 0.15s;
-}
-.kv-tool-nav a:hover { color: var(--kv-text); }
-.kv-tool-nav a.kv-nav-active {
-  color: var(--kv-accent);
-  border-bottom-color: var(--kv-accent);
-}
-html:not(.dark) .kv-tool-nav { background: #edf2f7; border-color: #e2e8f0; }
-html:not(.dark) .kv-tool-nav a { color: #64748b; }
-html:not(.dark) .kv-tool-nav a:hover { color: #0f172a; }
-html:not(.dark) .kv-tool-nav a.kv-nav-active { color: #0ea5e9; border-bottom-color: #0ea5e9; }
-@media (max-width: 800px) {
-  .kv-tool-nav { justify-content: flex-start; }
-}
 
 /* ── Disclaimer banner ── */
 .disclaimer-banner {
@@ -168,8 +94,8 @@ html:not(.dark) .kv-tool-nav a.kv-nav-active { color: #0ea5e9; border-bottom-col
   line-height: 1.55;
 }
 html:not(.dark) .prop-model-note {
-  background: color-mix(in srgb, var(--kv-warn) 10%, #edf2f7);
-  color: #475569;
+  background: color-mix(in srgb, var(--kv-warn) 10%, var(--kv-bg));
+  color: var(--kv-muted);
 }
 
 /* ── Tab bar ── */
@@ -361,7 +287,7 @@ select option { background: var(--kv-card-2); }
   flex: 1;
   padding: 10px 16px;
   background: var(--kv-accent);
-  color: #0f172a;
+  color: var(--kv-bg);
   border: none;
   border-radius: 7px;
   font-size: 0.92rem;
@@ -738,6 +664,25 @@ footer a:hover { text-decoration: underline; }
 @media (max-width: 480px) {
   .summary-cards.cols-3 { grid-template-columns: 1fr 1fr; }
   .summary-cards.cols-4 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Sharesight affiliate block ── */
+.sharesight-promo { max-width: 900px; margin: 48px auto 0; padding: 0 20px; }
+.sharesight-promo-inner { display: flex; align-items: center; gap: 20px; padding: 18px 22px; background: var(--kv-card); border: 1px solid var(--kv-border); border-radius: 12px; }
+.sharesight-logo-wrap { flex: 0 0 auto; background: #fff; border-radius: 8px; padding: 6px 10px; display: flex; align-items: center; }
+.sharesight-logo-wrap img { height: 28px; width: auto; display: block; }
+.sharesight-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.sharesight-offer { font-size: 0.85rem; color: var(--kv-accent) !important; }
+.sharesight-copy > p:not(.sharesight-offer) { font-size: 0.85rem; color: var(--kv-muted); line-height: 1.5; }
+.sharesight-cta { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.sharesight-cta a { display: inline-block; padding: 9px 18px; background: var(--kv-accent); color: var(--kv-bg); font-weight: 600; font-size: 0.85rem; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: opacity 0.15s; }
+.sharesight-cta a:hover { opacity: 0.85; }
+.sharesight-affiliate-note { font-size: 0.7rem; color: var(--kv-muted); text-align: right; }
+@media (max-width: 600px) {
+  .sharesight-promo-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .sharesight-cta { align-items: flex-start; width: 100%; }
+  .sharesight-cta a { width: 100%; text-align: center; }
+  .sharesight-affiliate-note { text-align: left; }
 }
 
 /* ── Cross-tool: copy-link button ── */

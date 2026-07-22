@@ -38,6 +38,10 @@ app.js            — all DOM, events, chart rendering, localStorage
 
 Script load order at the end of `<body>`: `utils.js` → `calc/tax.js` → `calc/cgt.js` → `calc/property.js` → `app.js`. `cgt.js` exports `TRANSITION_YEAR = 2027.5` (1 July 2027 as decimal year) as a global that `app.js` references directly.
 
+## Design System
+
+Follows KashVector design rules (`C:\Projects\Rules\kashvector-design.md`). **Migrated to the "Ink & Amber" / "Paper & Ink" rebrand 2026-07-22** — dark mode bg `#0b1120`, accent `#f5a623`; light mode bg `#faf8f4`, accent `#1a3a5f`; Carlito font. Full token table and rollout tracker: `Kashvector.md`'s "Ink & Amber rebrand — rollout status" section (in `C:\Projects\StockAnalysis`). Chart colors are theme-aware via the `cc()` helper in `app.js`, which returns the correct token values for the active light/dark mode at render time — update both branches together if the palette changes again.
+
 ## Key business logic
 
 **Three CGT scenarios for ETFs/shares:**

@@ -135,13 +135,13 @@ function bindCopyLinkButton(btnId, incomeInputId) {
 function cc() {
   const dark = document.documentElement.classList.contains('dark');
   return {
-    grid:   dark ? '#334155' : '#e2e8f0',
-    text:   dark ? '#94a3b8' : '#64748b',
-    accent: '#38bdf8',
-    muted:  dark ? '#475569' : '#b0bec5',
+    grid:   dark ? '#223052' : '#e7e2d8',
+    text:   dark ? '#93a0bd' : '#4d5c6b',
+    accent: dark ? '#f5a623' : '#1a3a5f',
+    muted:  dark ? '#93a0bd' : '#4d5c6b',
     pass:   '#22c55e',
     fail:   '#ef4444',
-    warn:   '#f59e0b',
+    warn:   dark ? '#f97316' : '#b45309',
   };
 }
 
