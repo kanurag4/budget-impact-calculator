@@ -2,6 +2,16 @@
 
 /* ── Constants ── */
 const $ = id => document.getElementById(id);
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[ch]));
+}
+
+// Glossary term annotation — degrades to a plain escaped label if
+// kv-glossary.js failed to load, so a missing script never breaks rendering.
+const T = (key, label) => window.kvGlossary ? kvGlossary.term(key, label) : escapeHtml(label);
 const STORAGE_KEY   = 'kv-budget-impact';
 const CURRENT_YEAR  = new Date().getFullYear();
 
@@ -242,7 +252,7 @@ function updatePropTransitionNote() {
 function updateEtfDerived() {
   const income = parseMoney($('etfIncome'));
   const rate   = marginalRate2627(income);
-  $('etfMarginalRate').textContent = `Marginal rate (2026-27): ${(rate * 100).toFixed(0)}%`;
+  $('etfMarginalRate').innerHTML = T('marginal-tax-rate', 'Marginal rate') + ` (2026-27): ${(rate * 100).toFixed(0)}%`;
 
   const holdingYears = parseInt($('etfYears').value);
   const acquired     = $('etfAcquired').value;
@@ -260,7 +270,7 @@ function updateEtfDerived() {
 function updatePropDerived() {
   const income      = parseMoney($('propIncome'));
   const rate        = marginalRate2627(income);
-  $('propMarginalRate').textContent = `Marginal rate (2026-27): ${(rate * 100).toFixed(0)}%`;
+  $('propMarginalRate').innerHTML = T('marginal-tax-rate', 'Marginal rate') + ` (2026-27): ${(rate * 100).toFixed(0)}%`;
 
   const price       = parseMoney($('propPrice'));
   const rental      = parseMoney($('propRental'));
@@ -471,14 +481,14 @@ function renderEtfResults({
           <tr><td>Taxable / indexed gain</td>
               <td class="num">$${formatMoney(cgtHyp.taxableGain || 0)}</td>
               <td class="num">${taxableGainNew}</td></tr>
-          <tr><td>CGT payable</td>
+          <tr><td>${T('capital-gains-tax', 'CGT')} payable</td>
               <td class="num">$${formatMoney(cgtHyp.cgtLiability)}</td>
               <td class="num ${isWorse ? 'fail' : isBetter ? 'pass' : ''}">
                 $${formatMoney(cgtActual.cgtLiability)}</td></tr>
           <tr><td>Effective rate on gain</td>
               <td class="num">${oldEffRate}%</td>
               <td class="num">${newEffRate}%</td></tr>
-          <tr><td>Marginal tax rate</td>
+          <tr><td>${T('marginal-tax-rate', 'Marginal tax rate')}</td>
               <td class="num muted">${(marginalRate * 100).toFixed(0)}%</td>
               <td class="num muted">${(marginalRate * 100).toFixed(0)}%</td></tr>
         </tbody>
