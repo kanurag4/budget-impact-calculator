@@ -145,10 +145,10 @@ function bindCopyLinkButton(btnId, incomeInputId) {
 function cc() {
   const dark = document.documentElement.classList.contains('dark');
   return {
-    grid:   dark ? '#223052' : '#e7e2d8',
-    text:   dark ? '#93a0bd' : '#4d5c6b',
-    accent: dark ? '#f5a623' : '#1a3a5f',
-    muted:  dark ? '#93a0bd' : '#4d5c6b',
+    grid:   dark ? '#1e3050' : '#e7e2d8',
+    text:   dark ? '#7b8eaa' : '#4d5c6b',
+    accent: dark ? '#fbbf24' : '#12335e',
+    muted:  dark ? '#7b8eaa' : '#4d5c6b',
     pass:   '#22c55e',
     fail:   '#ef4444',
     warn:   dark ? '#f97316' : '#b45309',
