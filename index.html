@@ -40,28 +40,91 @@
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What does the 2026-27 Australian budget mean for investors?",
-        "acceptedAnswer": { "@type": "Answer", "text": "The 2026-27 Federal Budget introduced two changes for investors from 1 July 2027. The 50% CGT discount is removed for assets acquired on or after 12 May 2026 — replaced by inflation indexation with a 30% minimum rate. Negative gearing deductions are also restricted for established investment properties purchased on or after 12 May 2026. This budget impact calculator models the exact dollar cost of both changes." }
-      },
-      {
-        "@type": "Question",
-        "name": "How do I calculate my budget impact?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Use the ETF/Shares tab to model CGT changes, or the Investment Property tab for negative gearing impacts. Enter your income, investment details, and expected holding period, then click Calculate Impact to see old versus new rules side by side with a chart showing how the tax gap changes over your holding period." }
-      },
-      {
-        "@type": "Question",
-        "name": "Is the 50% CGT discount removed for existing investments?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No — assets owned before 12 May 2026 are grandfathered. If you sell before 1 July 2027, the full 50% CGT discount applies. If you hold past that date, gains are split: growth to 1 July 2027 keeps the 50% discount, and growth after uses indexation. This calculator handles the split automatically." }
-      },
-      {
-        "@type": "Question",
         "name": "How does the CGT change affect ETF investors?",
-        "acceptedAnswer": { "@type": "Answer", "text": "For ETFs or shares acquired after 12 May 2026, the 50% CGT discount is removed. Instead, only gains above inflation are taxed at a minimum rate of 30%. This is generally worse for high-growth assets but can be better for slow-growth ones where indexation absorbs most of the gain." }
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For assets acquired after 12 May 2026, the 50% CGT discount is removed. Instead, only the portion of your gain above inflation (the \"real\" gain) is taxed — at a minimum rate of 30%. This is generally worse for high-growth assets but can be better for slow-growth ones where indexation absorbs most of the gain."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is indexation and how does it work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Indexation adjusts your original cost base upward by the inflation rate each year you hold the asset. Only gains above the inflated cost base are taxed. For example, if you paid $50,000 and inflation runs at 2% p.a., your indexed cost base grows to ~$61,000 after 10 years — only gains above that are taxable."
+        }
       },
       {
         "@type": "Question",
         "name": "Who is affected by the negative gearing restriction?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Only buyers of established (existing) investment properties on or after 12 May 2026. New builds are exempt. Properties already owned before 12 May 2026 are grandfathered. Shares and ETFs are completely unaffected. Note: the Treasury factsheet states quarantined losses are deductible against 'other income from residential properties, including capital gains' — this calculator models the single-property case, so investors with multiple residential properties may have additional flexibility not shown here." }
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Only buyers of established (existing) investment properties on or after 12 May 2026. New builds are exempt — you retain full negative gearing. Properties you already own before 12 May 2026 are grandfathered under old rules. Shares and ETFs are completely unaffected by negative gearing changes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this tool store my financial data?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. All calculations run entirely in your browser. Your inputs are saved to your browser's local storage so the page remembers them on return visits. Nothing is transmitted to any server."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the 2026-27 Australian budget mean for investors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The 2026-27 Federal Budget introduced two significant changes for investors effective 1 July 2027. First, the 50% CGT discount is removed for assets acquired on or after 12 May 2026 — replaced by an inflation indexation method with a 30% minimum tax rate. Second, negative gearing deductions are restricted for established investment properties purchased on or after 12 May 2026. This budget impact calculator lets you model the exact dollar cost of both changes for your specific situation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I use this budget impact calculator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Select the ETF/Shares tab to model CGT changes, or the Investment Property tab for negative gearing impacts. Enter your income (to determine your marginal tax rate), your investment details, and your expected holding period. Click \"Calculate Impact\" to see a side-by-side comparison of your tax liability under old rules versus the new budget rules, including a chart showing how the gap changes over time."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the 50% CGT discount being removed for existing investments?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No — assets you already own before 12 May 2026 are grandfathered. If you sell before 1 July 2027, the full 50% CGT discount applies as usual. If you hold past 1 July 2027, your gains are split at that date: growth up to 1 July 2027 retains the 50% discount, and growth after that date is taxed under the new indexation rules. This calculator handles that split automatically when you select \"Before 12 May 2026\" and enter your purchase date."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do new build investors have a choice between the 50% discount and indexation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. According to the Treasury factsheet, investors in newly built properties can choose either the 50% CGT discount or indexation — whichever results in lower tax. This calculator automatically applies the better method for your inputs. In high-growth scenarios indexation usually wins; in lower-growth or shorter-hold scenarios the 50% discount may produce a lower bill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens to quarantined negative gearing losses for restricted properties?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For established investment properties purchased on or after 12 May 2026, rental losses from year 2 onwards cannot be offset against your salary — they are quarantined and carried forward. The Treasury factsheet states these losses are only deductible against other income from residential properties, including capital gains. This calculator models the single-property case: carried-forward losses are applied against future positive rental income from that same property (reducing the taxable amount), and any remaining balance reduces the taxable capital gain when you sell. If you hold multiple residential investment properties, you may also be able to apply those losses against income from your other properties — giving you more flexibility than this tool's single-property model shows. Note: exactly how quarantined losses interact with the new 30% CGT minimum rate at exit is a legislative assumption pending final ATO guidance. This calculator treats them as reducing the indexed gain dollar-for-dollar before the tax rate is applied — the most defensible interpretation of the factsheet language."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I still negatively gear a restricted property in the first year?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The negative gearing restriction takes effect from 1 July 2027. If you buy an established property after 12 May 2026 but before 30 June 2027, your first year of losses is still fully deductible against your salary income — the quarantine only applies from year 2 (i.e. from 1 July 2027 onwards). This calculator reflects that transitional rule automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the source for the calculations in this tool?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Calculations are based on the official Treasury factsheet: Negative Gearing and Capital Gains Tax Reform, published by the Australian Government in May 2026. The worked examples in that document (Jane, Zoe, Michael) were used to verify this calculator's outputs. You can read the factsheet at budget.gov.au."
+        }
       }
     ]
   }
