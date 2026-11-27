@@ -1,11 +1,12 @@
 // Income tax calculations — pure functions, no DOM access.
 // All rates include the 2% Medicare levy as stated in the 2026-27 Budget.
 
-// 2024-25 marginal rates (Stage 3, incl. Medicare)
+// 2024-25 marginal rates (Stage 3, incl. Medicare): 16% + 2% = 18% on the first band
+// (was 21%, the pre-Stage-3 19% rate, until 2026-11-28)
 // Brackets: $0 | $18,200 | $45,000 | $120,000 | $180,000
 function marginalRate2425(income) {
   if (income <= 18200)  return 0;
-  if (income <= 45000)  return 0.21;
+  if (income <= 45000)  return 0.18;
   if (income <= 120000) return 0.345;
   if (income <= 180000) return 0.39;
   return 0.47;
@@ -25,7 +26,7 @@ function marginalRate2627(income) {
 function effectiveTax2425(income) {
   if (income <= 18200) return 0;
   let tax = 0;
-  if (income > 18200)  tax += Math.min(income - 18200,  45000 - 18200)  * 0.21;
+  if (income > 18200)  tax += Math.min(income - 18200,  45000 - 18200)  * 0.18;
   if (income > 45000)  tax += Math.min(income - 45000,  120000 - 45000) * 0.345;
   if (income > 120000) tax += Math.min(income - 120000, 180000 - 120000) * 0.39;
   if (income > 180000) tax += (income - 180000) * 0.47;

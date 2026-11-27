@@ -18,7 +18,7 @@ const CURRENT_YEAR  = new Date().getFullYear();
 const DEFAULTS = {
   etfIncome: 120000, etfAcquired: 'pre-budget',
   etfPurchaseMonth: 9, etfPurchaseYear: 2025,
-  etfAmount: 50000, etfGrowth: 7, etfDividend: 3, etfFranking: 70,
+  etfAmount: 50000, etfGrowth: 7,
   etfInflation: 2, etfYears: 10,
   propIncome: 120000, propType: 'established-new',
   propPurchaseMonth: 1, propPurchaseYear: 2020,
@@ -329,8 +329,6 @@ function calcEtf(silent = false) {
   const purchaseYear  = parseInt($('etfPurchaseYear').value);
   const costBase      = parseMoney($('etfAmount'));
   const growthRate    = (parseFloat($('etfGrowth').value)    || 0) / 100;
-  const dividendYield = (parseFloat($('etfDividend').value)  || 0) / 100;
-  const frankingPct   = (parseFloat($('etfFranking').value)  || 0) / 100;
   const inflationRate = (parseFloat($('etfInflation').value) || 0) / 100;
   const holdingYears  = parseInt($('etfYears').value);
   const marginalRate  = marginalRate2627(income);
@@ -358,7 +356,7 @@ function calcEtf(silent = false) {
 
   renderEtfResults({
     costBase, growthRate, holdingYears, marginalRate, inflationRate,
-    salePrice, dividendYield, frankingPct, acquired,
+    salePrice, acquired,
     purchaseYear, purchaseMonth, cgtActual, cgtHyp, rows,
   });
 
@@ -368,8 +366,6 @@ function calcEtf(silent = false) {
     etfIncome: income, etfAcquired: acquired,
     etfPurchaseMonth: purchaseMonth, etfPurchaseYear: purchaseYear,
     etfAmount: costBase, etfGrowth: parseFloat($('etfGrowth').value) || 0,
-    etfDividend: parseFloat($('etfDividend').value) || 0,
-    etfFranking: parseFloat($('etfFranking').value) || 0,
     etfInflation: parseFloat($('etfInflation').value) || 0,
     etfYears: holdingYears,
   });
@@ -379,7 +375,7 @@ function calcEtf(silent = false) {
 
 function renderEtfResults({
   costBase, growthRate, holdingYears, marginalRate, inflationRate,
-  salePrice, dividendYield, frankingPct, acquired,
+  salePrice, acquired,
   purchaseYear, purchaseMonth, cgtActual, cgtHyp, rows,
 }) {
   const diff       = cgtActual.cgtLiability - cgtHyp.cgtLiability;
@@ -1042,7 +1038,7 @@ function bindEvents() {
   bindMoneyInputs();
 
   /* Number inputs → derived update only */
-  ['etfGrowth','etfDividend','etfFranking','etfInflation',
+  ['etfGrowth','etfInflation',
    'propRate','propGrowth','propInflation'].forEach(id => {
     const el = $(id);
     if (el) el.addEventListener('input', updateDerived);

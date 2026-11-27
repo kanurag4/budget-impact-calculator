@@ -122,7 +122,7 @@ function loadApp() {
   const ids = [
     'etfIncome', 'etfMarginalRate', 'etfAcquired', 'etfAcquiredNote', 'etfPurchaseDateField',
     'etfPurchaseMonth', 'etfPurchaseYear', 'etfTransitionNote', 'etfAmount', 'etfGrowth',
-    'etfDividend', 'etfFranking', 'etfInflation', 'etfYears', 'etfYearsLabel', 'etfSellYear',
+    'etfInflation', 'etfYears', 'etfYearsLabel', 'etfSellYear',
     'btnCalcEtf', 'btnResetEtf', 'etfResults',
     'propIncome', 'propMarginalRate', 'propType', 'propTypeNote', 'propPurchaseDateField',
     'propPurchaseMonth', 'propPurchaseYear', 'propTransitionNote', 'propPrice', 'propRental',
@@ -138,8 +138,6 @@ function loadApp() {
   Object.assign(document.getElementById('etfPurchaseYear'), { value: '2025' });
   Object.assign(document.getElementById('etfAmount'), { value: '50,000' });
   Object.assign(document.getElementById('etfGrowth'), { value: '7' });
-  Object.assign(document.getElementById('etfDividend'), { value: '3' });
-  Object.assign(document.getElementById('etfFranking'), { value: '70' });
   Object.assign(document.getElementById('etfInflation'), { value: '2' });
   Object.assign(document.getElementById('etfYears'), { value: '10' });
 

@@ -54,8 +54,8 @@ test('2026-27 marginal rates switch exactly above bracket boundaries', () => {
 
 test('2024-25 marginal rates switch exactly above bracket boundaries', () => {
   assert.equal(marginalRate2425(18200), 0);
-  assert.equal(marginalRate2425(18201), 0.21);
-  assert.equal(marginalRate2425(45000), 0.21);
+  assert.equal(marginalRate2425(18201), 0.18);
+  assert.equal(marginalRate2425(45000), 0.18);
   assert.equal(marginalRate2425(45001), 0.345);
   assert.equal(marginalRate2425(120000), 0.345);
   assert.equal(marginalRate2425(120001), 0.39);
