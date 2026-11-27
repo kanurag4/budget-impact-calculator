@@ -13,7 +13,7 @@ npx --yes http-server "C:\Projects\StockAnalysis\www" -p 8001 -c-1
 
 After changes, sync to the deploy target before testing:
 ```powershell
-Copy-Item -Recurse -Force "C:\Projects\2026-2027 Budget Impact\*" "C:\Projects\StockAnalysis\www\budget-impact\" -Exclude ".git",".Codex","AGENTS.md"
+Copy-Item -Recurse -Force "C:\Projects\2026-2027 Budget Impact\*" "C:\Projects\StockAnalysis\www\budget-impact\" -Exclude ".git",".Codex","AGENTS.md","CLAUDE.md","README.md"
 ```
 
 Deploy by pushing `C:\Projects\StockAnalysis` (Cloudflare Pages watches that repo):
