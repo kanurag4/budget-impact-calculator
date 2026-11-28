@@ -689,3 +689,6 @@ footer a:hover { text-decoration: underline; }
   font-size: 0.78rem;
   padding: 0;
 }
+
+/* Simple layout (2026-11-28): the step 1 choice replaces the tab bar inside Fine-tune */
+.kvs-finetune .tab-bar { display: none; }

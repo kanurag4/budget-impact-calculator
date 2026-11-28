@@ -4,20 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f8fafc">
-  <title>Budget Impact Calculator 2026-27 — CGT &amp; Negative Gearing | KashVector</title>
+  <title>Budget Impact Calculator 2026: CGT &amp; Gearing | KashVector</title>
   <meta property="og:site_name" content="KashVector">
   <meta property="og:image" content="https://kashvector.com/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="KashVector — free stock valuation tools">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Budget Impact Calculator 2026-27 — CGT &amp; Negative Gearing">
-  <meta name="twitter:description" content="Free Australian budget impact calculator. See how the 2026-27 Federal Budget's CGT and negative gearing changes affect your investments in real dollars.">
+  <meta name="twitter:title" content="Budget Impact Calculator 2026: CGT &amp; Gearing | KashVector">
+  <meta name="twitter:description" content="See in dollars how the 2026-27 Budget changes the tax on your shares or rental property: the CGT discount change and negative gearing limits. Free.">
   <meta name="twitter:image" content="https://kashvector.com/og-image.png">
-  <meta name="description" content="Free Australian budget impact calculator for the 2026-27 Federal Budget. See the real-dollar effect on your CGT liability and negative gearing tax savings for ETFs and investment properties.">
+  <meta name="description" content="See in dollars how the 2026-27 Budget changes the tax on your shares or rental property: the CGT discount change and negative gearing limits. Free.">
   <link rel="canonical" href="https://kashvector.com/budget-impact/">
-  <meta property="og:title" content="Budget Impact Calculator 2026-27 — CGT &amp; Negative Gearing">
-  <meta property="og:description" content="Free Australian budget impact calculator. See how the 2026-27 Federal Budget's CGT and negative gearing changes affect your investments in real dollars.">
+  <meta property="og:title" content="Budget Impact Calculator 2026: CGT &amp; Gearing | KashVector">
+  <meta property="og:description" content="See in dollars how the 2026-27 Budget changes the tax on your shares or rental property: the CGT discount change and negative gearing limits. Free.">
   <meta property="og:url" content="https://kashvector.com/budget-impact/">
   <meta property="og:type" content="website">
   <script type="application/ld+json">
@@ -137,6 +137,7 @@
   <link rel="stylesheet" href="/kv-shared.css">
   <link rel="stylesheet" href="/kv-glossary.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/kv-simple.css">
   <link rel="icon" type="image/svg+xml" href="../budget-impact-icon.svg">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
@@ -155,6 +156,114 @@
   <!-- Disclaimer -->
   <p class="disclaimer-banner">Important Disclaimer: We're still fine-tuning this tool, so please treat results as estimates. The calculations reflect broad 2026 Budget assumptions; however, upcoming legislative changes could greatly impact your specific situation. Use this as a general guide to understanding the 30% CGT floor and index-based tax shifts.</p>
 
+<section class="kvs" id="simple" aria-label="Simple calculator">
+  <h2 class="kvs-q">Will the 2026 Budget change the tax on your investment?</h2>
+  <p class="kvs-lead">From 1 July 2027, two tax rules change for investments bought after <strong>12 May 2026</strong>:
+    the 50% discount on capital gains tax is replaced, and losses on established rental properties can no longer cut
+    your tax on your pay. Answer three questions and we'll show the difference in dollars.</p>
+  <div class="kvs-how" aria-label="What changed">
+    <div><b>1</b>Old rule: when you sell for a profit, you pay tax on half the gain.</div>
+    <div><b>2</b>New rule: you pay tax on the gain above inflation, at 30% or more.</div>
+    <div><b>3</b>Rental losses on established homes bought after 12 May 2026 are held over, not claimed against your pay.</div>
+  </div>
+
+  <div class="kvs-step">
+    <h3><span class="kvs-num">1</span>What's the investment?</h3>
+    <div class="kvs-choices" id="sKind" role="group" aria-label="Investment type">
+      <button type="button" class="kvs-choice" data-key="etf" aria-pressed="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+        <span><b>Shares or ETFs</b><small>Bought on the share market.</small></span>
+      </button>
+      <button type="button" class="kvs-choice" data-key="property" aria-pressed="false">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>
+        <span><b>A rental property</b><small>A property you rent out.</small></span>
+      </button>
+    </div>
+    <div class="kvs-field" id="sWhenShares">
+      <span class="kvs-label">When did you buy, or will you buy?</span>
+      <div class="kvs-pills kvs-pills-2" id="sEtfWhen" role="group" aria-label="When bought">
+        <button type="button" class="kvs-pill" data-key="pre-budget" aria-pressed="false"><b>Before 12 May 2026</b></button>
+        <button type="button" class="kvs-pill" data-key="post-budget" aria-pressed="false"><b>After 12 May 2026</b></button>
+      </div>
+    </div>
+    <div class="kvs-field" id="sWhenProp" hidden>
+      <span class="kvs-label">Which describes it?</span>
+      <div class="kvs-choices" id="sPropType" role="group" aria-label="Property type">
+        <button type="button" class="kvs-pill" data-key="grandfathered" aria-pressed="false"><b>Bought before 12 May 2026</b><small>any property</small></button>
+        <button type="button" class="kvs-pill" data-key="established-new" aria-pressed="false"><b>An existing home, bought after 12 May 2026</b><small>the new rules apply</small></button>
+        <button type="button" class="kvs-pill" data-key="newbuild" aria-pressed="false"><b>A brand-new build, bought after 12 May 2026</b><small>new builds keep the old rental rules</small></button>
+      </div>
+    </div>
+    <div class="kvs-field" id="sBoughtQ" hidden>
+      <label for="sBought">Year you bought it</label>
+      <div class="kvs-money"><input id="sBought" class="kvs-nopre" inputmode="numeric" autocomplete="off"></div>
+    </div>
+  </div>
+
+  <div class="kvs-step">
+    <h3><span class="kvs-num">2</span>The numbers</h3>
+    <div class="kvs-field">
+      <label for="sIncome">Your income before tax <span class="kvs-sub">Sets your tax rate</span></label>
+      <div class="kvs-money"><span>$</span><input id="sIncome" inputmode="numeric" autocomplete="off"></div>
+    </div>
+    <div class="kvs-field" id="sEtfQs">
+      <label for="sAmount">How much you invested, or will invest</label>
+      <div class="kvs-money"><span>$</span><input id="sAmount" inputmode="numeric" autocomplete="off"></div>
+    </div>
+    <div id="sPropQs" hidden>
+      <div class="kvs-row2">
+        <div class="kvs-field">
+          <label for="sPrice">Price of the property</label>
+          <div class="kvs-money"><span>$</span><input id="sPrice" inputmode="numeric" autocomplete="off"></div>
+        </div>
+        <div class="kvs-field">
+          <label for="sRentWk">Rent it earns <span class="kvs-sub">per week</span></label>
+          <div class="kvs-money"><span>$</span><input id="sRentWk" inputmode="numeric" autocomplete="off"></div>
+        </div>
+      </div>
+      <div class="kvs-field">
+        <label for="sLoan">Loan on it</label>
+        <div class="kvs-money"><span>$</span><input id="sLoan" inputmode="numeric" autocomplete="off"></div>
+      </div>
+      <p class="kvs-worked" id="sPropLine"></p>
+    </div>
+  </div>
+
+  <div class="kvs-step">
+    <h3><span class="kvs-num">3</span>How long will you keep it?</h3>
+    <div class="kvs-field">
+      <label for="sYears">Years from when you bought it <span class="kvs-sub" id="sYearsTxt"></span></label>
+      <input id="sYears" class="kvs-range" type="range" min="1" max="30" step="1">
+    </div>
+  </div>
+
+  <div class="kvs-answer" id="sAnswer" aria-live="polite">
+    <div class="kvs-eyebrow"></div>
+    <div class="kvs-big"></div>
+    <p class="kvs-answer-sub"></p>
+  </div>
+
+  <div class="kvs-card">
+    <h3>Tax under the old rules and the new</h3>
+    <div class="kvs-bars" id="sBars"></div>
+    <p class="kvs-note" id="sBarsNote"></p>
+  </div>
+
+  <div class="kvs-card">
+    <h3>Better or worse off, depending on when you sell</h3>
+    <div class="kvs-timeline" id="sTl"></div>
+    <div class="kvs-axis"><span>Year 1</span><span id="sTlEnd"></span></div>
+    <p class="kvs-note">Each bar is a different selling year: green means less tax than the old rules, red means more.</p>
+  </div>
+
+  <div class="kvs-card">
+    <h3>Good to know</h3>
+    <ul class="kvs-risks" id="sRisks"></ul>
+  </div>
+</section>
+
+<details class="kvs-finetune" id="fineTune">
+  <summary><span>Fine-tune the assumptions<small>Growth, inflation, interest, purchase month, and the full workings and charts</small></span></summary>
   <!-- Tab navigation -->
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="etf">ETF / Shares</button>
@@ -392,6 +501,7 @@
     </div><!-- /panel-property -->
 
   </main>
+</details>
 
   <section class="sharesight-promo" aria-label="Affiliate promotion">
     <a class="sharesight-promo-inner kv-aff-card" href="https://www.sharesight.com/au/kashvector/" target="_blank" rel="noopener sponsored">
@@ -478,6 +588,7 @@
   <script src="/kv-scenario.js"></script>
   <script src="/kv-glossary-data.js"></script>
   <script src="/kv-glossary.js"></script>
-  <script src="app.js"></script>
+  <script src="/kv-simple.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

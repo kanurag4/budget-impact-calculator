@@ -382,6 +382,7 @@ function renderEtfResults({
   const isBetter   = diff < -1;
   const isWorse    = diff > 1;
   const isNoChange = acquired === 'pre-budget' && cgtActual.split === false;
+  renderSimpleEtf(diff, cgtActual, cgtHyp, rows, holdingYears, acquired);
 
   /* ── Split breakdown banner (pre-budget, selling after transition) ── */
   const postTransitionNote = (cgtActual.split && cgtActual.postTransitionGain === 0)
@@ -691,6 +692,7 @@ function renderPropertyResults({
     : isNewbuild ? Math.min(0, proj.cgtDiff)
     :              proj.cgtDiff;
   const totalImpact = negGearingImpact + cgtImpact;
+  renderSimpleProp(totalImpact, negGearingImpact, cgtImpact, proj, holdingYears, propType);
 
   /* ── Split breakdown banner for grandfathered properties ── */
   const postTransitionNote = (hasSplit && cgtSplitDetail.postTransitionGain === 0)
@@ -1110,12 +1112,152 @@ function init() {
     });
   }
 
-  /* Auto-calculate on return visit if stored state exists, or silently when
-     arriving via a shared scenario link. */
-  if (Object.keys(stored).length > 2 || scenarioParamsApplied) {
-    calcEtf(true);
-    calcProperty(true);
-  }
+  /* Results show straight away and follow every change (simple layout, 2026-11-28). */
+  initSimple();
+  calcEtf(true);
+  calcProperty(true);
 }
 
 init();
+
+/* ══════════════════════════════════════════
+   SIMPLE LAYOUT (2026-11-28)
+   Three plain steps at the top, each a front-end for the real fields in "Fine-tune" (kv-simple.js links them), and
+   one answer drawn from the same calculations as the full results. The page used to calculate only on its buttons;
+   with the simple layout every change recalculates (silently, after a short pause).
+══════════════════════════════════════════ */
+function simpleTab() {
+  const b = document.querySelector('.tab-btn.active');
+  return b ? b.dataset.tab : 'etf';
+}
+function simpleFire(el) {
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function simpleSetField(id, v) { const el = $(id); el.value = v; simpleFire(el); }
+
+var simpleCalcTimer = null;   // var: init() runs before this line is reached
+function simpleScheduleCalc() {
+  clearTimeout(simpleCalcTimer);
+  simpleCalcTimer = setTimeout(() => { calcEtf(true); calcProperty(true); }, 300);
+}
+
+function initSimple() {
+  if (!window.kvSimple || !$('simple')) return;
+  const S = window.kvSimple;
+  // One income for both tabs: typing writes both real fields; the box shows the active tab's (simpleSync).
+  $('sIncome').addEventListener('input', () => {
+    const n = S.moneyBox($('sIncome'));
+    if (n !== null) ['etfIncome', 'propIncome'].forEach(id => simpleSetField(id, S.commas(n)));
+  });
+  $('sIncome').addEventListener('blur', simpleScheduleCalc);
+  S.link($('sAmount'), $('etfAmount'));
+  S.link($('sPrice'), $('propPrice'));
+  S.link($('sLoan'), $('propLoan'));
+  S.link($('sRentWk'), $('propRental'), {
+    toReal: (wk) => Math.round(wk * 52),
+    fromReal: (s) => Math.round(parseFloat(String(s).replace(/[^0-9.]/g, '') || 0) / 52),
+  });
+  $('sYears').addEventListener('input', () => simpleSetField(simpleTab() === 'etf' ? 'etfYears' : 'propYears', $('sYears').value));
+  $('sBought').addEventListener('input', () => {
+    const y = $('sBought').value.replace(/[^0-9]/g, '');
+    if (y.length === 4) simpleSetField(simpleTab() === 'etf' ? 'etfPurchaseYear' : 'propPurchaseYear', y);
+  });
+  S.group($('sKind'), key => { switchTab(key); simpleScheduleCalc(); });
+  S.group($('sEtfWhen'), key => simpleSetField('etfAcquired', key));
+  S.group($('sPropType'), key => simpleSetField('propType', key));
+
+  // Every change, in the simple steps or under Fine-tune, recalculates
+  ['input', 'change'].forEach(t => {
+    $('simple').addEventListener(t, simpleScheduleCalc);
+    $('fineTune').addEventListener(t, simpleScheduleCalc);
+  });
+}
+
+function simpleSync() {
+  const S = window.kvSimple;
+  S.syncAll();
+  const tab = simpleTab(), isEtf = tab === 'etf';
+  S.press($('sKind'), tab);
+  S.press($('sEtfWhen'), $('etfAcquired').value);
+  S.press($('sPropType'), $('propType').value);
+  $('sWhenShares').hidden = !isEtf;
+  $('sWhenProp').hidden = isEtf;
+  $('sEtfQs').hidden = !isEtf;
+  $('sPropQs').hidden = isEtf;
+  const pre = isEtf ? $('etfAcquired').value === 'pre-budget' : $('propType').value === 'grandfathered';
+  $('sBoughtQ').hidden = !pre;
+  const keep = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
+  keep('sBought', isEtf ? $('etfPurchaseYear').value : $('propPurchaseYear').value);
+  keep('sIncome', $(isEtf ? 'etfIncome' : 'propIncome').value);
+  keep('sYears', isEtf ? $('etfYears').value : $('propYears').value);
+  $('sYearsTxt').textContent = (isEtf ? $('etfYears').value : $('propYears').value) + ' years';
+}
+
+function simpleAnswer(impact, n, detail) {
+  const S = window.kvSimple, money = S.money;
+  S.answer($('sAnswer'), {
+    tone: impact <= 1 ? 'good' : impact < 1000 ? 'meh' : 'bad',
+    eyebrow: 'If you sell after ' + n + ' year' + (n === 1 ? '' : 's') + ', the Budget means',
+    big: Math.abs(impact) <= 1 ? 'No change' : impact > 0 ? money(impact) + ' more tax' : money(impact) + ' less tax',
+    sub: detail,
+  });
+}
+
+function renderSimpleEtf(diff, cgtActual, cgtHyp, rows, holdingYears, acquired) {
+  if (!window.kvSimple || !$('simple') || simpleTab() !== 'etf') return;
+  const S = window.kvSimple, money = S.money;
+  simpleSync();
+  simpleAnswer(diff, holdingYears,
+    'You\'d pay about <b>' + money(cgtActual.cgtLiability) + '</b> in capital gains tax, against ' + money(cgtHyp.cgtLiability) + ' under the old 50% discount.' +
+    (acquired === 'pre-budget' && cgtActual.split ? ' Growth up to 1 July 2027 keeps the old discount; only growth after that uses the new rule.' : '') +
+    (acquired === 'pre-budget' && cgtActual.split === false ? ' Selling before 1 July 2027 keeps the old rules.' : ''));
+  S.bars($('sBars'), [
+    { label: 'Old rules (50% discount)', value: cgtHyp.cgtLiability, cls: 'alt' },
+    { label: 'New rules', value: cgtActual.cgtLiability, cls: '' },
+  ]);
+  $('sBarsNote').textContent = 'Capital gains tax when you sell. Dividends and franking credits aren\'t changed by the Budget.';
+  S.timeline($('sTl'), rows.map(r => -r.diff), { titles: rows.map(r => 'Sell in year ' + r.year + ': ' + (r.diff > 0 ? money(r.diff) + ' more tax' : money(r.diff) + ' less tax')) });
+  $('sTlEnd').textContent = 'Year ' + rows.length;
+  simpleRisks(true);
+}
+
+function renderSimpleProp(totalImpact, negGearingImpact, cgtImpact, proj, holdingYears, propType) {
+  if (!window.kvSimple || !$('simple') || simpleTab() !== 'property') return;
+  const S = window.kvSimple, money = S.money;
+  simpleSync();
+  const rent = parseMoney($('propRental')), interest = parseMoney($('propLoan')) * ((parseFloat($('propRate').value) || 0) / 100);
+  const net = rent - interest - parseMoney($('propMaintenance'));
+  $('sPropLine').innerHTML = 'Rent of <b>' + money(rent) + ' a year</b> against about ' + money(interest) + ' of interest and ' +
+    money(parseMoney($('propMaintenance'))) + ' of costs: ' + (net < 0 ? 'a loss of ' + money(net) + ' a year (negatively geared).' : 'a profit of ' + money(net) + ' a year.');
+  const parts = [];
+  if (Math.abs(negGearingImpact) > 1) parts.push(money(negGearingImpact) + (negGearingImpact > 0 ? ' less back at tax time while you own it (losses held over)' : ' more back at tax time'));
+  if (Math.abs(cgtImpact) > 1) parts.push(money(cgtImpact) + (cgtImpact > 0 ? ' more' : ' less') + ' capital gains tax when you sell');
+  simpleAnswer(totalImpact, holdingYears, parts.length ? 'That\'s ' + parts.join(', and ') + '.'
+    : propType === 'grandfathered' ? 'A property bought before 12 May 2026 keeps the old rental rules, and growth to 1 July 2027 keeps the old discount.' : '');
+  const oldTax = proj.cgtOld;
+  S.bars($('sBars'), [
+    { label: 'Old rules', value: oldTax, cls: 'alt' },
+    { label: 'New rules', value: oldTax + totalImpact, cls: '' },
+  ]);
+  $('sBarsNote').textContent = 'Capital gains tax when you sell, plus any tax refunds you\'d no longer get on rental losses.';
+  const isNew = propType === 'newbuild', gf = propType === 'grandfathered';
+  const yearly = proj.rows.map(r => {
+    const cgt = gf ? r.cgtSplit - r.cgtOld : isNew ? Math.min(0, r.cgtNew - r.cgtOld) : r.cgtNew - r.cgtOld;
+    return (r.cumTaxSavedOld - r.cumTaxSavedNew) + cgt;
+  });
+  S.timeline($('sTl'), yearly.map(v => -v), { titles: yearly.map((v, i) => 'Sell in year ' + (i + 1) + ': ' + (v > 0 ? money(v) + ' more tax' : money(v) + ' less tax')) });
+  $('sTlEnd').textContent = 'Year ' + yearly.length;
+  simpleRisks(false);
+}
+
+function simpleRisks(isEtf) {
+  window.kvSimple.list($('sRisks'), [
+    '<b>Only investments bought after 12 May 2026 are fully under the new rules.</b> Older ones keep the 50% discount on growth up to 1 July 2027.',
+    isEtf
+      ? '<b>The new rule can mean less tax</b> when growth is close to inflation, and more when growth is strong.'
+      : '<b>Held-over rental losses aren\'t lost:</b> they reduce tax on later rent, and on the gain when you sell.',
+    '<b>These use the rules as announced in the 2026–27 Budget.</b> Details can still change.',
+    '<b>Growth rates are guesses.</b> Try a different one under Fine-tune and see how the answer moves.',
+  ]);
+}
